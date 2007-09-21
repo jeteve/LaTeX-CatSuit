@@ -1,0 +1,140 @@
+
+                             LaTeX::Driver
+
+                             Version 0.02
+
+                           21 September 2007
+
+        Copyright (C) 2007 Andrew Ford.        All Rights Reserved
+
+          This is free software; you can redistribute it and/or
+             modify it under the same terms as Perl itself.
+
+
+
+NOTE THIS IS BETA SOFTWARE - ITS INTERFACE IS LIABLE TO CHANGE.
+
+I welcome any and all feedback - Andrew <a.ford@ford-mason.co.uk>
+
+
+
+
+DESCRIPTION
+-----------
+
+The LaTeX::Driver module takes care of running and re-running latex on
+a LaTeX document so that forward references, tables of contents, and
+lists of figures and tables are resolved.  It will also run bibtex and
+makeindex if it detects that a bibliography or in index have been
+specified, and will re-run latex again one or more times until the
+formatting of the document has stabilized.
+
+The code was in part derived from the Template Toolkit Latex plugin
+and patches I had written for Template Toolkit before the Latex plugin
+was forked off from the main TT distribution.  It was also inspired by
+the latexn C Shell script and the latexmk script by John Collins, both
+of which are on CTAN (the Comprehensive TeX Archive Network).
+
+
+QUICK START
+-----------
+
+TO BE WRITTEN
+
+For further details on installation, see the separate INSTALL file.
+
+
+WHAT'S NEW?
+-----------
+
+Version 0.01 is a new module.  It was factored out of Template-Latex,
+which itself was created by moving the code out of the core Template
+Toolkit distribution (version 2.15).
+
+See the Changes file for further details of the changes in these
+releases.
+
+
+GENERAL FEATURES
+----------------
+
+Some of the key features of the Latex::Driver module are listed below.
+See the documentation for further detail.
+
+
+DOCUMENTATION
+-------------
+
+EXPAND
+
+
+The 'Changes' file in the distribution directory documents all visible
+changes between versions of the Template Toolkit.  See the section 
+'VERSION COMPATABILITY' below for further details.
+
+The 'TODO' file, also in the distribution directory, lists known bugs,
+planned enhancements and possible new features for future versions.
+
+The rest of the documentation is distributed in Pod and HTML formats.
+The Pod pages are installed when you 'make install' and can be viewed
+using 'perldoc', e.g.
+
+
+SUPPORT
+-------
+
+The Template Toolkit mailing list provides a forum for discussing
+issues relating to the use and abuse of the Template Toolkit.  There
+are a number of knowledgeable and helpful individuals who frequent the
+list (including the author) who can often offer help or suggestions.
+Please respect their time and patience by checking the documentation
+and/or mailing list archives before asking questions that may already
+have been answered.   
+
+To subscribe to the mailing list, send an email to:
+
+    templates-request@template-toolkit.org
+
+with the message 'subscribe' in the body.  You can also use the web 
+interface to subscribe or browse the archives:
+
+    http://www.template-toolkit.org/mailman/listinfo/templates
+
+A low-volume, moderated mailing list exists for announcements about new
+releases of the Template Toolkit and related products.  To subscribe, send
+an email to:
+
+    templates-announce-request@template-toolkit.org
+
+with the message 'subscribe' in the body.  A web interface also exists
+for subscription and browsing the archives:
+
+    http://www.template-toolkit.org/mailman/listinfo/templates-announce
+
+For information about commercial support and consultancy for the Template 
+Toolkit, please contact the author.
+
+
+AUTHOR
+------
+
+This module was written by Andrew Ford <a.ford@ford-mason.co.uk>.
+
+It borrows from the Template Toolkit distribution by Andy Wardley
+<abw@wardley.org> with the assistance and contributions from many
+other people. In 2006 the Latex plugin was separated out into its own
+distribution and Andrew Ford <a.ford@ford-mason.co.uk> took over as
+maintainer.  He created this module as part of the refactoring of
+Template-Latex.
+
+
+
+COPYRIGHT
+---------
+
+Copyright (C) 2007 Andrew Ford.   All Rights Reserved.
+Portions Copyright (C) 1996-2007 Andy Wardley.  All Rights Reserved.
+
+This is free software; you can redistribute it and/or modify it under
+the same terms as Perl itself.
+

@@ -1,0 +1,19 @@
+% $Id: testdoc15.tex 4 2007-09-21 14:51:24Z andrew $
+% Test input file for checking bibliography generation
+% Do not make gratuitous changes here as the text is checked by the
+% test script 15-bibtex.t.
+
+\documentclass{article}
+\bibliographystyle{alpha}
+\date{20 September 2007}
+\author{A.N. Other}
+\title{Simple Test Document 15}
+\begin{document}
+\maketitle
+
+This is a test document with a bibliography.
+
+We reference the Badger book\cite{wardley-ptt-2003} and the Camel book\cite{wall-perl-2000}.
+
+\bibliography{testbib}
+\end{document}

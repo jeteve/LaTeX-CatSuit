@@ -1,0 +1,30 @@
+MANIFEST			This list of files
+README                          General information, installation, etc.
+INSTALL
+Changes
+TODO
+Makefile.PL                    
+lib/LaTeX/Driver.pm
+lib/LaTeX/Driver/Paths.pm
+t/README
+t/00-basic.t
+t/10-simpledoc.t
+t/11-references.t
+t/12-includes.t
+t/13-tableofcontents.t
+t/14-makeindex.t
+t/15-bibtex.t
+t/20-complexdoc.t
+t/testdata/testdocdir10/testdoc10.tex
+t/testdata/testdocdir11/testdoc11.tex
+t/testdata/testdocdir12/testdoc12.tex
+t/testdata/testdocdir12/testinc.tex
+t/testdata/testdocdir13/testdoc13.tex
+t/testdata/testdocdir14/testdoc14.tex
+t/testdata/testdocdir15/testdoc15.tex
+t/testdata/testdocdir15/testbib.bib
+t/testdata/testdocdir20/testdoc20.tex
+t/testdata/testdocdir20/testbib.bib
+t/testdata/testdocdir20/testinc.tex
+t/lib/Test/LaTeX/Driver.pm
+META.yml                                 Module meta-data (added by MakeMaker)

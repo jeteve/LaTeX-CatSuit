@@ -1,0 +1,25 @@
+This directory contains unit test scripts for the LaTeX::Driver module.
+
+The test scripts invoke the module to format documents in
+subdirectories of the testdata directory.  Each subdirectory
+corresponds to a single test script. The subdirectory should be
+cleaned out at the start of the test script and again at the end of
+the script.
+
+The test documents are structured so that they each test an aspect of
+LaTeX formatting and the test scripts look for a series of patterns in
+the generated dvi files.
+
+
+TODO
+====
+
+write test scripts to cover
+
+* included graphics
+
+* documents with errors
+
+* index style files
+
+
