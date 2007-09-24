@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 10-simpledoc.t 13 2007-09-21 22:56:47Z andrew $
+# $Id: 10-simpledoc.t 28 2007-09-24 20:32:16Z andrew $
 
 use strict;
 use blib;
@@ -8,13 +8,12 @@ use File::Spec;
 use lib ("$Bin/../lib", "$Bin/lib");
 use Data::Dumper;
 
-use Test::More tests => 10;
-
+use Test::More tests => 22;
 use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
 # Debug configuration
-my $debug        = 0;
+
 my $dont_tidy_up = 0;
 
 # Get the test configuration
@@ -45,6 +44,53 @@ test_dvifile($drv, [ "Simple Test Document $testno",	# title
 		     'A.N. Other',			# author
 		     '20 September 2007',		# date
 		     'This is a test document with a single line of text.' ] );
+
+
+tidy_directory($basedir, $docname, $debug);
+
+diag("Checking the generation of PDF");
+$drv = LaTeX::Driver->new( basedir     => $basedir,
+			   basename    => $docname,
+			   outputtype  => 'pdf',
+			   DEBUG       => $debug,
+			   DEBUGPREFIX => '# [latex]: ' );
+
+ok($drv->run, "formatting $docname");
+ok(-f ($drv->basepath . '.pdf'), "PDF file exists");
+ok(! -f ($drv->basepath . '.dvi'), "but DVI file doesn't");
+ok(! -f ($drv->basepath . '.ps'),  "but PS  file doesn't");
+
+
+tidy_directory($basedir, $docname, $debug);
+
+diag("Checking the generation of PostScript");
+$drv = LaTeX::Driver->new( basedir     => $basedir,
+			   basename    => $docname,
+			   outputtype  => 'ps',
+			   DEBUG       => $debug,
+			   DEBUGPREFIX => '# [latex]: ' );
+
+ok($drv->run, "formatting $docname to PostScript");
+ok(-f ($drv->basepath . '.ps'), "PostScript file exists");
+ok(-f ($drv->basepath . '.dvi'), "as does DVI file");
+ok(! -f ($drv->basepath . '.pdf'),  "but PS file doesn't");
+
+
+tidy_directory($basedir, $docname, $debug);
+
+diag("Checking the generation of PDF, via PostScript");
+$drv = LaTeX::Driver->new( basedir     => $basedir,
+			   basename    => $docname,
+			   outputtype  => 'pdf(ps)',
+			   DEBUG       => $debug,
+			   DEBUGPREFIX => '# [latex]: ' );
+
+ok($drv->run, "formatting $docname to PDF, via PostScript");
+ok(-f ($drv->basepath . '.pdf'),  "PDF file exists");
+ok(-f ($drv->basepath . '.ps'),   "PostScript file exists");
+ok(-f ($drv->basepath . '.dvi'),  "DVI file exists");
+
+
 
 tidy_directory($basedir, $docname, $debug)
     unless $dont_tidy_up;

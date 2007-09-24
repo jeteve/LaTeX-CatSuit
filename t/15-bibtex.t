@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 15-bibtex.t 13 2007-09-21 22:56:47Z andrew $
+# $Id: 15-bibtex.t 28 2007-09-24 20:32:16Z andrew $
 
 use strict;
 use blib;
@@ -14,7 +14,7 @@ use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
 # Debug configuration
-my $debug        = 0;
+
 my $dont_tidy_up = 1;
 
 # Get the test configuration

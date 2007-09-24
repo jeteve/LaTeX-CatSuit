@@ -18,7 +18,7 @@
 # HISTORY
 #   * Extracted from the Template::Latex module (AF, 2007-09-10)
 #
-#   $Id: Driver.pm 24 2007-09-24 05:50:22Z andrew $
+#   $Id: Driver.pm 30 2007-09-24 20:55:44Z andrew $
 #========================================================================
 
 package LaTeX::Driver;
@@ -28,12 +28,14 @@ use warnings;
 
 use base 'Class::Accessor';
 use Cwd;
+use English;
+use Exception::Class ( 'LaTeX::Driver::Exception' );
 use File::Copy;
 use File::Compare;
 use File::Path;
 use File::Spec;
 
-our $VERSION = 0.03;
+our $VERSION = 0.04;
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options
                                formatter preprocessors postprocessors program_path
@@ -97,8 +99,8 @@ sub new {
 
     # Sanity check first - check we're running on a supported OS
 
-    $class->throw("not available on $^O")
-        if $^O =~ /^(MacOS|os2|VMS)$/i;
+    $class->throw("not available on $OSNAME")
+        if $OSNAME =~ /^(MacOS|os2|VMS)$/i;
 
 
     # Examine the options - we need at least a basename to work with
@@ -262,7 +264,21 @@ sub run {
 
     # Run any postprocessors (e.g.: dvips, ps2pdf, etc).
 
-    map { $self->$_ } @{$self->postprocessors};
+    foreach my $postproc (@{$self->postprocessors}) {
+        my $method = $postproc;
+        if ($self->can($method)) {
+            $self->$method();
+        }
+        else {
+            $method = 'run_' . $postproc;
+            if ($self->can($method)) {
+                $self->$method();
+            }
+            else {
+                $self->throw("cannot find postprocessor $postproc");
+            }
+        }
+    }
 
 
     # Return any output
@@ -539,7 +555,7 @@ sub run_ps2pdf {
 
     my $basename = $self->basename;
 
-    my $exitstatus = $self->run_command(ps2pdf => $basename);
+    my $exitstatus = $self->run_command(ps2pdf => sprintf("%s.ps %s.pdf", $basename, $basename));
 
     $self->throw("ps2pdf $basename failed ($exitstatus)")
         if $exitstatus;
@@ -570,18 +586,18 @@ sub run_command {
     # Set up environment variables
     $envvars ||= "TEXINPUTS";
     $envvars = [ $envvars ] unless ref $envvars;
-    $envvars = join(" ", ( map { sprintf("%s=%s", $_,
+    $envvars = join(" ", ( map { sprintf('%s=%s', $_,
                                          join(':', @{$self->texinput_path})) }
-                           @$envvars ) );
+                           @{$envvars} ) );
 
 
     # Format the command appropriately for our O/S
-    if ($^O eq 'MSWin32') {
+    if ($OSNAME eq 'MSWin32') {
         # This doesn't set the environment variables yet - what's the syntax?
         $cmd = "cmd /c \"cd $dir && $program $args\"";
     }
     else {
-        $args = "'$args'" if $args =~ /\\/;
+        $args = "'$args'" if $args =~ / \\ /mx;
         $cmd  = "cd $dir; $envvars $program $args 1>$null 2>$null 0<$null";
     }
 
@@ -644,12 +660,12 @@ sub cleanup {
 sub throw {
     my $self = shift;
     $self->cleanup;
-    die join('', @_);
+    LaTeX::Driver::Exception->throw( error => join('', @_) );
 }
 
 sub debug {
     print STDERR $DEBUGPREFIX || "[latex] ", @_;
-    print STDERR "\n" unless $_[-1] =~ /\n$/;
+    print STDERR "\n" unless $_[-1] =~ / \n $ /mx;
     return;
 }
 
@@ -664,7 +680,7 @@ LaTeX::Driver - Latex driver
 
 =head1 VERSION
 
-This document describes version 0.03 of C<LaTeX::Driver>.
+This document describes version 0.04 of C<LaTeX::Driver>.
 
 =head1 SYNOPSIS
 
@@ -692,7 +708,7 @@ result of the processing up to a dozen or more intermediate files are
 created.  These can be removed with the C<cleanup> method.
 
 
-=head1 METHODS
+=head1 SUBROUTINES/METHODS
 
 =over 4
 
@@ -855,6 +871,8 @@ Runs the formatter (C<latex> or C<pdflatex>.
 
 
 =head1 DIAGNOSTICS
+
+=head1 CONFIGURATION AND ENVIRONMENT
 
 
 =head1 DEPENDENCIES

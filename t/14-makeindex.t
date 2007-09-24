@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 14-makeindex.t 22 2007-09-23 20:35:35Z andrew $
+# $Id: 14-makeindex.t 28 2007-09-24 20:32:16Z andrew $
 #
 # Test out invocation of makeindex:
 # * Tests the default invocation of makeindex
@@ -23,7 +23,7 @@ use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
 # Debug configuration
-$debug        = 0;
+
 $dont_tidy_up = 0;
 
 # Get the test configuration

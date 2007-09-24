@@ -10,8 +10,21 @@
 #
 #
 #------------------------------------------------------------------------
-# $Id: Changes 25 2007-09-24 06:02:32Z andrew $
+# $Id: Changes 34 2007-09-24 20:59:12Z andrew $
 #========================================================================
+
+
+#------------------------------------------------------------------------
+# Version 0.04 - 2007-09-24
+#------------------------------------------------------------------------
+
+* Expanded documentation a bit more
+
+* added option parsing to test library so that test scripts can be run
+  with -d to switch on debug messages
+
+* added basic Exception::Class based exceptions (still need to
+  differentiate between exception types.
 
 
 #------------------------------------------------------------------------

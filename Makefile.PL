@@ -47,6 +47,11 @@ our $PS2PDF    = ttprompt('ps2pdf path',    find_program($ENV{PATH}, "ps2pdf"));
 our $BIBTEX    = ttprompt('bibtex path',    find_program($ENV{PATH}, "bibtex"));
 our $MAKEINDEX = ttprompt('makeindex path', find_program($ENV{PATH}, "makeindex"));
 
+if (!$LATEX and !$PDFLATEX) {
+    my $continue = ttprompt('You don\'t seem to have LaTeX installed.  Continue anyway?', 'N');
+    die("Aborting as LaTeX is not installed\n") unless uc($continue) =~ /^Y/;
+}
+
 fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'latex',     $LATEX);
 fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'pdflatex',  $PDFLATEX);
 fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'dvips',     $DVIPS);
@@ -61,19 +66,11 @@ my %opts = (
     'VERSION_FROM' => 'lib/LaTeX/Driver.pm',
     'PMLIBDIRS'    => [ 'lib' ], 
     'PREREQ_PM'    => { 
+	'Exception::Class' => 0,
     },
     'dist'         => {
         'COMPRESS' => 'gzip',
         'SUFFIX'   => 'gz',
-    },
-    'clean'        => {
-        'FILES'    => join(' ', qw( t/output/test1.pdf 
-                                    t/output/test1.ps 
-                                    t/output/test1.dvi
-                                    t/output/test2 
-                                    t/output/test2.pdf 
-                                    t/output/test2.ps 
-                                    t/output/test2.dvi )),
     },
 );
 

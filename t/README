@@ -2,13 +2,15 @@ This directory contains unit test scripts for the LaTeX::Driver module.
 
 The test scripts invoke the module to format documents in
 subdirectories of the testdata directory.  Each subdirectory
-corresponds to a single test script. The subdirectory should be
-cleaned out at the start of the test script and again at the end of
-the script.
+corresponds to a single test script (so 14-makeindex.t uses the files
+in testdata/14-makeindex.t, with the main LaTeX file being
+14-makeindex.tex). The subdirectory should be cleaned out at the start
+of the test script and again at the end of the script.
 
 The test documents are structured so that they each test an aspect of
 LaTeX formatting and the test scripts look for a series of patterns in
-the generated dvi files.
+the generated dvi files.  The function test_dvifile uses the dvitype
+program if found to extract the strings from a DVI file.
 
 
 TODO
@@ -18,8 +20,9 @@ write test scripts to cover
 
 * included graphics
 
-* documents with errors
+* documents with errors (in progress)
 
-* index style files
+* test generation of PDF and PostScript files
+
 
 

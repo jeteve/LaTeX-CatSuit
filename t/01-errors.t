@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # Script to test LaTeX::Driver's error handling
-# $Id: 01-errors.t 12 2007-09-21 22:55:28Z andrew $
+# $Id: 01-errors.t 32 2007-09-24 20:57:19Z andrew $
 
 use strict;
 use blib;
@@ -11,14 +11,20 @@ use File::Spec;
 use lib ("$Bin/../lib", "$Bin/lib");
 use Data::Dumper;
 
-use Test::More tests => 11;
-use Test::Exception;
-use Test::LaTeX::Driver;
+use Test::More;
 
+BEGIN {
+    eval "use Test::Exception";
+    plan skip_all => "Test::Exception needed" if $@;
+}
+
+use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
+plan tests => 11;
+
 # Debug configuration
-$debug        = 0;
+
 $dont_tidy_up = 0;
 $debugprefix  = '# [latex]: ';
 

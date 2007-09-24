@@ -18,7 +18,7 @@
 #   * New file - but portions extracted from the Template::Latex
 #     module (AF, 2007-09-19)
 #
-#   $Id: Driver.pm 21 2007-09-23 16:21:30Z andrew $
+#   $Id: Driver.pm 28 2007-09-24 20:32:16Z andrew $
 #
 # TODO
 #   * finish off commenting and documentation
@@ -32,16 +32,28 @@ package Test::LaTeX::Driver;
 
 use strict;
 use warnings;
-use FindBin qw($Bin);
-require Exporter;
+
 use Config;
+use FindBin qw($Bin);
+use Getopt::Long;
+
+use Test::More;
+require Exporter;
+
 
 our @ISA    = qw(Exporter);
-our @EXPORT = qw(get_test_params test_dvifile tidy_directory find_program dvitype);
+our @EXPORT = qw(get_test_params test_dvifile tidy_directory find_program dvitype $debug);
 
 our $WIN32  = ($^O eq 'MSWin32');
 
+our $level  = 0;
+our $debug  = 0;
 my $dvitype = find_program($ENV{PATH}, "dvitype");
+
+GetOptions("debug" => \$debug,
+           "level=i" => \$level);
+
+$debug = $level if $level;
 
 
 sub get_test_params {
@@ -118,7 +130,7 @@ sub tidy_directory {
     # Suppress undefined value warnings
     $debug = 0 unless defined($debug); 
 
-    Test::More::diag("tidying directory '$dir'") if $debug > 1;
+    diag("tidying directory '$dir'") if $debug > 1;
 
     die "directory $dir does not exist" unless -d $dir;
     die "filename $docname contains a directory part" if $docname =~ m!/!;
@@ -129,60 +141,60 @@ sub tidy_directory {
                         dvi ps pdf)) {
 	my $file = File::Spec->catfile($dir, "${docname}.$ext");
 	if (-e $file) {
-	    Test::More::diag("removing file '$file'") if $debug > 1;
+	    diag("removing file '$file'") if $debug > 1;
 	    my $rc = unlink($file);
-	    Test::More::diag("unlink returned $rc") if $debug > 2;	    
-	    Test::More::diag("couldn't remove file '$file'") if $debug > 1 and -e $file;
+	    diag("unlink returned $rc") if $debug > 2;	    
+	    diag("couldn't remove file '$file'") if $debug > 1 and -e $file;
 	}
 	else {
-	    Test::More::diag("file '$file' does not exist") if $debug > 3;	    
+	    diag("file '$file' does not exist") if $debug > 3;	    
 	}
     }
 }
+
+
+#------------------------------------------------------------------------
+# test_dvifile($drv, $pattern_seq)
+#
+# Examines the TeX DVI file generated an looks for the sequence of
+# patterns specified
+#------------------------------------------------------------------------
 
 sub test_dvifile {
     my $drv = shift;
     my @patterns = ref $_[0] ? @{$_[0]} : @_;
     my $file = $drv->basepath . ".dvi";
     if (! -f $file) {
-	Test::More::fail("dvifile $file does not exist");
+	fail("dvifile $file does not exist");
 	return;
     }
-    my $dvioutput =  `$dvitype $file`; 
-    my $total = @patterns;
-    my $found = 0;
-    my $pattern = shift @patterns;
-    foreach (split(/\n/, $dvioutput)) {
-	next unless /^\[(.*)\]$/;
-	my $string = $1;
-	if ($string =~ /$pattern/) {
-	    if (@patterns) {
-		$pattern = shift @patterns;
-		$found++;
-	    }
-	    else {
-		Test::More::pass($drv->basename . ".dvi contains the $total patterns specified");
-		return 1;
-	    }
-	}
+  SKIP:
+    {
+        skip "cannot find dvitype", 1 unless $dvitype;
+        
+        my $dvioutput =  `$dvitype $file`; 
+        my $total = @patterns;
+        my $found = 0;
+        my $pattern = shift @patterns;
+        foreach (split(/\n/, $dvioutput)) {
+            next unless /^\[(.*)\]$/;
+            my $string = $1;
+            if ($string =~ /$pattern/) {
+                if (@patterns) {
+                    $pattern = shift @patterns;
+                    $found++;
+                }
+                else {
+                    pass($drv->basename . ".dvi contains the $total patterns specified");
+                    return 1;
+                }
+            }
+        }
+        fail("pattern '$pattern' not found in " . $drv->basename . ".dvi (found $found of $total patterns)");
     }
-    Test::More::fail("pattern '$pattern' not found in " . $drv->basename . ".dvi (found $found of $total patterns)");
     return;
 }
 
-sub grep_dvi {
-    my $dir = shift;
-    my $file = shift;
-    my $regexp = shift;
-    my $path = File::Spec->catfile($dir, $file);
-    return "FAIL - $file does not exist" unless -f $path;
-    my $dvioutput =  `$dvitype $path`; 
-    foreach (split(/\n/, $dvioutput)) {
-	next unless /^\[(.*)\]$/;
-	return "PASS - found '$regexp'" if /$regexp/;
-    }
-    return "FAIL - '$regexp' not found";
-}
 
 1;
 
