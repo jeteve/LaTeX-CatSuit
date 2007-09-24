@@ -18,7 +18,7 @@
 #   * New file - but portions extracted from the Template::Latex
 #     module (AF, 2007-09-19)
 #
-#   $Id: Driver.pm 4 2007-09-21 14:51:24Z andrew $
+#   $Id: Driver.pm 21 2007-09-23 16:21:30Z andrew $
 #
 # TODO
 #   * finish off commenting and documentation
@@ -45,12 +45,13 @@ my $dvitype = find_program($ENV{PATH}, "dvitype");
 
 
 sub get_test_params {
-    my $testno = $0;
-    $testno =~ s!(?:.*/?)(\d\d)-[-\w]+\.t$!$1!;
-    die "cannot determine test no from program name $0" unless $testno;
-    my $basedir      = "$Bin/testdata/testdocdir$testno";
-    my $docname      = "testdoc$testno";
-    return ($testno, $basedir, $docname);
+    my $basename = $0;
+    $basename =~ s{ ^ .* / }{}x;
+    $basename =~ s/\.t$//;
+    my ($testno) = $basename =~ m/^(\d+)/;
+    die "cannot determine test no from script name $0" unless $testno;
+    my $basedir      = "$Bin/testdata/$basename";
+    return ($testno, $basedir, $basename);
 }
 
 

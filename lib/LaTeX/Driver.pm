@@ -18,7 +18,7 @@
 # HISTORY
 #   * Extracted from the Template::Latex module (AF, 2007-09-10)
 #
-#   $Id: Driver.pm 16 2007-09-21 23:03:09Z andrew $
+#   $Id: Driver.pm 24 2007-09-24 05:50:22Z andrew $
 #========================================================================
 
 package LaTeX::Driver;
@@ -33,7 +33,7 @@ use File::Compare;
 use File::Path;
 use File::Spec;
 
-our $VERSION = 0.02;
+our $VERSION = 0.03;
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options
                                formatter preprocessors postprocessors program_path
@@ -662,6 +662,10 @@ __END__
 
 LaTeX::Driver - Latex driver
 
+=head1 VERSION
+
+This document describes version 0.03 of C<LaTeX::Driver>.
+
 =head1 SYNOPSIS
 
     use LaTeX::Driver;
@@ -850,6 +854,49 @@ Runs the formatter (C<latex> or C<pdflatex>.
 =back
 
 
+=head1 DIAGNOSTICS
+
+
+=head1 DEPENDENCIES
+
+C<LaTeX::Driver> depends on latex and friends being installed.
+
+
+=head1 BUGS AND LIMITATIONS
+
+This is beta software - there are bound to be bugs and misfeatures.
+If you have any comments about this software I would be very grateful
+to hear them; email me at E<lt>a.ford@ford-mason.co.ukE<gt>.
+
+Among the things I am aware of are:
+
+=over 4
+
+=item *
+
+I haven't worked out how I am going to deal with tex-related environment variables.
+
+=back
+
+
+=head1 FUTURE DIRECTIONS
+
+=over 4
+
+=item *
+
+Look at how path variables could be specified to the filter
+(C<TEXINPUTS>, C<TEXINPUTS_latex>, C<TEXINPUTS_pdflatex>,
+C<BIBINPUTS>, etc), and how these should interact with the system
+paths.
+
+=item *
+
+Investigate pre- and post-processors and other auxilliary programs.
+
+=back
+
+
 =head1 BACKGROUND
 
 This module has its origins in the original C<latex> filter that was
@@ -951,19 +998,6 @@ This is a placeholder for information not yet incorporated into the rest of the 
 
 May want to mention the kpathsea library, the C<kpsewhich> program,
 the web2c TeX distribution, TeX live, tetex, TeX on Windows, etc.
-
-
-=head1 BUGS AND LIMITATIONS
-
-This is beta software - there are bound to be bugs and misfeatures.
-If you have any comments about this software I would be very grateful
-to hear them; email me at E<lt>a.ford@ford-mason.co.ukE<gt>.
-
-
-=head1 FUTURE DIRECTIONS
-
-Could investigate preprocessors and other auxilliary programs.
-
 
 
 =head1 AUTHOR

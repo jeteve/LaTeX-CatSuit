@@ -1,31 +1,40 @@
 #!/usr/bin/perl
-# $Id: 14-makeindex.t 13 2007-09-21 22:56:47Z andrew $
+# $Id: 14-makeindex.t 22 2007-09-23 20:35:35Z andrew $
+#
+# Test out invocation of makeindex:
+# * Tests the default invocation of makeindex
+# * Tests alternate style (replaces comma after index term with colon)
+# * Tests index options (uses -l for letter ordering of index entries
+ 
 
 use strict;
+use warnings;
+
+use vars qw($debug $dont_tidy_up $drv);
 use blib;
 use FindBin qw($Bin);
 use File::Spec;
 use lib ("$Bin/../lib", "$Bin/lib");
 use Data::Dumper;
 
-use Test::More tests => 10;
+use Test::More tests => 16;
 
 use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
 # Debug configuration
-my $debug        = 0;
-my $dont_tidy_up = 0;
+$debug        = 0;
+$dont_tidy_up = 0;
 
 # Get the test configuration
 my ($testno, $basedir, $docname) = get_test_params();
 
 tidy_directory($basedir, $docname, $debug);
 
-my $drv = LaTeX::Driver->new( basedir     => $basedir,
-			      basename    => $docname,
-			      DEBUG       => $debug,
-			      DEBUGPREFIX => '# [latex]: ' );
+$drv = LaTeX::Driver->new( basedir     => $basedir,
+			   basename    => $docname,
+			   DEBUG       => $debug,
+			   DEBUGPREFIX => '# [latex]: ' );
 
 diag("Checking the formatting of a LaTeX document with an index");
 isa_ok($drv, 'LaTeX::Driver');
@@ -43,10 +52,51 @@ is($drv->stats->{makeindex_runs}, 1, "should have run makeindex once");
 test_dvifile($drv, [ "Simple Test Document $testno",	# title
 		     'A.N. Other',			# author
 		     '20 September 2007',		# date
-		     'This is a test document that defines an index term.',
+		     "This is a test document that defines the index terms `seal' and `sea lion'.",
+		     "These are the example terms used in the makeindex man page.",
 		     '^ 1$',				# page number 1
 	             '^Index$',				# Index section heading
-		     '^xyzzy, 1$',			# the index term
+		     # word ordering of index entries
+		     'sea lion, 1$',			# two-word index term
+		     'seal, 1$',			# one-word index term
+		     '^ 2$' ] );			# page number 2
+
+tidy_directory($basedir, $docname, $debug);
+
+diag("run again with an explicit index style option");
+$drv = LaTeX::Driver->new( basedir      => $basedir,
+			   basename     => $docname,
+			   indexstyle   => 'testind',
+			   DEBUG        => $debug,
+			   DEBUGPREFIX  => '# [latex]: ' );
+
+isa_ok($drv, 'LaTeX::Driver');
+
+ok($drv->run, "formatting $docname");
+
+test_dvifile($drv, [ '^Index$',				# Index section heading
+		     # word ordering of index entries
+		     'sea lion: 1$',			# two-word index term
+		     'seal: 1$',			# one-word index term
+		     '^ 2$' ] );			# page number 2
+
+tidy_directory($basedir, $docname, $debug);
+
+diag("run again with -l (letter ordering) option");
+$drv = LaTeX::Driver->new( basedir      => $basedir,
+			   basename     => $docname,
+			   indexoptions => '-l',
+			   DEBUG        => $debug,
+			   DEBUGPREFIX  => '# [latex]: ' );
+
+isa_ok($drv, 'LaTeX::Driver');
+
+ok($drv->run, "formatting $docname");
+
+test_dvifile($drv, [ '^Index$',				# Index section heading
+		     # letter ordering of index entries
+		     'seal, 1$',			# one-word index term
+		     'sea lion, 1$',			# two-word index term
 		     '^ 2$' ] );			# page number 2
 
 tidy_directory($basedir, $docname, $debug)

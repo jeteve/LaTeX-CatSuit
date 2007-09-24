@@ -10,8 +10,21 @@
 #
 #
 #------------------------------------------------------------------------
-# $Id: Changes 16 2007-09-21 23:03:09Z andrew $
+# $Id: Changes 25 2007-09-24 06:02:32Z andrew $
 #========================================================================
+
+
+#------------------------------------------------------------------------
+# Version 0.03 - 2007-09-24
+#------------------------------------------------------------------------
+
+* Expanded documentation
+
+* Reorganized testdata so that the directories/files match the names
+  of the test scripts that use them
+
+* Added tests for constructor errors, running the module on broken
+  LaTeX files, specifying options to makeindex, and quality metrics
 
 
 #------------------------------------------------------------------------
