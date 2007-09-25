@@ -31,6 +31,7 @@ tidy_directory($basedir, $docname, $debug);
 
 my $drv = LaTeX::Driver->new( basedir     => $basedir,
 			      basename    => $docname,
+			      outputtype  => 'dvi',
 			      DEBUG       => $debug,
 			      DEBUGPREFIX => '# [latex]: ' );
 

@@ -10,8 +10,23 @@
 #
 #
 #------------------------------------------------------------------------
-# $Id: Changes 34 2007-09-24 20:59:12Z andrew $
+# $Id: Changes 41 2007-09-25 20:14:49Z andrew $
 #========================================================================
+
+
+#------------------------------------------------------------------------
+# Version 0.05 - 2007-09-25
+#------------------------------------------------------------------------
+
+* default output type is now 'pdf' (that is probably what most people
+  are going to want to generate)
+
+* added texinputs option
+
+* added the following methods:  latex_path, pdflatex_path, bibtex_path,
+  makeindex_path, dvips_path, dvipdfm_path, ps2pdf_path and program_path
+
+* the program path defaults are now stored in a package-level hash
 
 
 #------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 14-makeindex.t 28 2007-09-24 20:32:16Z andrew $
+# $Id: 14-makeindex.t 38 2007-09-25 20:03:07Z andrew $
 #
 # Test out invocation of makeindex:
 # * Tests the default invocation of makeindex
@@ -33,6 +33,7 @@ tidy_directory($basedir, $docname, $debug);
 
 $drv = LaTeX::Driver->new( basedir     => $basedir,
 			   basename    => $docname,
+			   outputtype  => 'dvi',
 			   DEBUG       => $debug,
 			   DEBUGPREFIX => '# [latex]: ' );
 
@@ -67,6 +68,7 @@ diag("run again with an explicit index style option");
 $drv = LaTeX::Driver->new( basedir      => $basedir,
 			   basename     => $docname,
 			   indexstyle   => 'testind',
+			   outputtype  => 'dvi',
 			   DEBUG        => $debug,
 			   DEBUGPREFIX  => '# [latex]: ' );
 
@@ -86,6 +88,7 @@ diag("run again with -l (letter ordering) option");
 $drv = LaTeX::Driver->new( basedir      => $basedir,
 			   basename     => $docname,
 			   indexoptions => '-l',
+			   outputtype  => 'dvi',
 			   DEBUG        => $debug,
 			   DEBUGPREFIX  => '# [latex]: ' );
 

@@ -45,6 +45,10 @@ __END__
 
 LaTeX::Driver::Paths
 
+=head1 SYNOPSIS
+
+N/A - this file is only intended to be used from C<LaTeX::Driver>
+
 =head1 DESCRIPTION
 
 This module defines the default paths for the LaTeX executables.  It

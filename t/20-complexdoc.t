@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 20-complexdoc.t 27 2007-09-24 20:30:43Z andrew $
+# $Id: 20-complexdoc.t 36 2007-09-25 20:02:12Z andrew $
 
 use strict;
 use blib;
@@ -15,7 +15,7 @@ use LaTeX::Driver;
 
 # Debug configuration
 
-my $dont_tidy_up = 0;
+my $dont_tidy_up = 1;
 
 # Get the test configuration
 my ($testno, $basedir, $docname) = get_test_params();
@@ -25,6 +25,8 @@ tidy_directory($basedir, $docname, $debug);
 
 my $drv = LaTeX::Driver->new( basedir     => $basedir,
 			      basename    => $docname,
+			      outputtype  => 'dvi',
+			      TEXINPUTS   => [ "$Bin/testdata/00-common"],
 			      DEBUG       => $debug,
 			      DEBUGPREFIX => '# [latex]: ' );
 
@@ -48,9 +50,9 @@ test_dvifile($drv, [ "Complex Test Document $testno",	# title
 		     '20 September 2007',		# date
 		     '^Contents$',			# table of contents header
 		     'This is a test document with all features.',
-		     'The document has 11 pages.',
+		     'The document has 12 pages.',
 		     'Forward Reference',		# section title
-		     'Here is a reference to page 8.',
+		     'Here is a reference to page 9.',
 		     'File Inclusion',
 		     'Here we include another file.',
 		     'Included File',			# section title
@@ -66,9 +68,9 @@ test_dvifile($drv, [ "Complex Test Document $testno",	# title
 		     '^\\s*\\[WCC03\\]$',		# the bibiographic key
 		     'Andy Wardley, Darren Chamberlain, and Dave Cross.',
 	             '^Index$',				# Index section heading
-		     '\\bxyzzy, 7$',			# the index term
-		     '\\bxyzzy2, 11$',			# index term from the colophon
-		     '10$',			        # page number 10
+		     '\\bxyzzy, 8$',			# the index term
+		     '\\bxyzzy2, 12$',			# index term from the colophon
+		     '11$',			        # page number 11
 		     'Colophon$' ] );
 
 tidy_directory($basedir, $docname, $debug)

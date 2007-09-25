@@ -18,7 +18,7 @@
 # HISTORY
 #   * Extracted from the Template::Latex module (AF, 2007-09-10)
 #
-#   $Id: Driver.pm 30 2007-09-24 20:55:44Z andrew $
+#   $Id: Driver.pm 39 2007-09-25 20:08:17Z andrew $
 #========================================================================
 
 package LaTeX::Driver;
@@ -35,32 +35,32 @@ use File::Compare;
 use File::Path;
 use File::Spec;
 
-our $VERSION = 0.04;
+our $VERSION = 0.05;
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options
-                               formatter preprocessors postprocessors program_path
-                               maxruns extraruns stats texinput_path
+                               formatter preprocessors postprocessors _program_path
+                               maxruns extraruns stats texinputs_path
                                undefined_citations undefined_references
                                labels_changed rerun_required ) );
 
 our $DEBUG; $DEBUG = 0 unless defined $DEBUG;
 our $DEBUGPREFIX;
 
+
 # LaTeX executable paths set at installation time by the Makefile.PL
 
 eval { require LaTeX::Driver::Paths };
-our $LATEX     = $LaTeX::Driver::Paths::program_path{latex}     || '/usr/bin/latex';
-our $PDFLATEX  = $LaTeX::Driver::Paths::program_path{pdflatex}  || '/usr/bin/pdflatex';
-our $BIBTEX    = $LaTeX::Driver::Paths::program_path{bibtex}    || '/usr/bin/bibtex';
-our $MAKEINDEX = $LaTeX::Driver::Paths::program_path{makeindex} || '/usr/bin/makeindex';
-our $DVIPS     = $LaTeX::Driver::Paths::program_path{dvips}     || '/usr/bin/dvips';
-our $DVIPDFM   = $LaTeX::Driver::Paths::program_path{dvipdfm}   || '/usr/bin/dvipdfm';
-our $PS2PDF    = $LaTeX::Driver::Paths::program_path{ps2pdf}    || '/usr/bin/ps2pdf';
+
+our @PROGRAM_NAMES = qw(latex pdflatex bibtex makeindex dvips dvipdfm ps2pdf);
+our %program_path;
+
+map { $program_path{$_} = $LaTeX::Driver::Paths::program_path{$_} || "/usr/bin/$_" } @PROGRAM_NAMES;
+
 
 
 # valid output formats and program alias
 
-our $DEFAULT_OUTPUTTYPE = 'dvi';
+our $DEFAULT_OUTPUTTYPE = 'pdf';
 
 our %OUTPUTTYPE_FORMATTERS  = (
     dvi        => [ 'latex' ],
@@ -94,7 +94,7 @@ sub new {
     my $options = ref $_[0] ? shift : { @_ };
     my (@postprocessors, %path);
 
-    $DEBUG       = $options->{DEBUG};
+    $DEBUG       = $options->{DEBUG} || 0;
     $DEBUGPREFIX = $options->{DEBUGPREFIX} if exists $options->{DEBUGPREFIX};
 
     # Sanity check first - check we're running on a supported OS
@@ -124,7 +124,7 @@ sub new {
     # Determine how the document is to be processed
 
     my $formatter  = $options->{ formatter };
-    my $outputtype = $options->{ outputtype };
+    my $outputtype = $options->{ outputtype } || $options->{ format };
 
     # outputtype takes precedence - there is a formatter and zero or
     # more postprocessors for each output type; there are also special
@@ -179,38 +179,35 @@ sub new {
     # values.
 
     $options->{paths} ||= {};
-    foreach my $program (qw(latex pdflatex bibtex makeindex dvips ps2pdf)) {
-        $path{$program} = $LaTeX::Driver::Paths::program_path{$program};
-    }
-    map { $path{$_} = $options->{paths}->{$_} } keys %{$options->{paths}};
+
+    my $path = {};
+
+    map { $path->{$_} = $program_path{$_}; } @PROGRAM_NAMES;
+    map { $path->{$_} = $options->{paths}->{$_}; } keys %{ $options->{paths} };
 
 
-    my $self =  $class->SUPER::new({ basename       => $basename,
-                                     basedir        => $basedir,
-                                     basepath       => $basepath,
-                                     options        => $options,
-                                     maxruns        => $options->{maxruns}   || 10,
-                                     extraruns      => $options->{extraruns} ||  0,
-                                     formatter      => $formatter,
-                                     program_path   => \%path,
-                                     texinput_path  => [ '.', '' ],
-                                     preprocessors  => [],
-                                     postprocessors => \@postprocessors,
-                                     stats          => { formatter_runs => 0,
-                                                         bibtex_runs    => 0,
-                                                         makeindex_runs => 0 } });
+    # Set up the texinputs path
 
+    my $texinputs_path = $options->{TEXINPUTS} || $options->{texinputs} || [];
+    $texinputs_path = [ split(/:/, $texinputs_path) ] unless ref $texinputs_path;
 
+    # construct and return the object
 
-
-    # TODO: Setup the environment for the filter
-
-#    $self->setup_texinput_paths;
-
-
-    # Return the object
-
-    return $self;
+    return $class->SUPER::new({ basename       => $basename,
+                                basedir        => $basedir,
+                                basepath       => $basepath,
+                                options        => $options,
+                                maxruns        => $options->{maxruns}   || 10,
+                                extraruns      => $options->{extraruns} ||  0,
+                                formatter      => $formatter,
+                                _program_path  => $path,
+                                texinputs_path => join(':', ('.', @$texinputs_path, '')),
+                                preprocessors  => [],
+                                postprocessors => \@postprocessors,
+                                stats          => { formatter_runs => 0,
+                                                    bibtex_runs    => 0,
+                                                    makeindex_runs => 0 } });
+    
 }
 
 
@@ -223,7 +220,7 @@ sub new {
 sub run {
     my $self = shift;
 
-    $DEBUG = $self->options->{DEBUG};
+    $DEBUG = $self->options->{DEBUG} || 0;
 
     # Check that the file exists
 
@@ -574,7 +571,7 @@ sub run_command {
     my ($self, $progname, $args, $envvars) = @_;
 
     # get the full path to the executable for this output format
-    my $program = $self->program_path->{ $progname }
+    my $program = $self->program_path($progname)
         || $self->throw("$progname cannot be found, please specify its location");
 
     my $dir  = $self->basedir;
@@ -586,9 +583,7 @@ sub run_command {
     # Set up environment variables
     $envvars ||= "TEXINPUTS";
     $envvars = [ $envvars ] unless ref $envvars;
-    $envvars = join(" ", ( map { sprintf('%s=%s', $_,
-                                         join(':', @{$self->texinput_path})) }
-                           @{$envvars} ) );
+    $envvars = join(" ", ( map { sprintf('%s=%s', $_, $self->texinputs_path) } @{$envvars} ) );
 
 
     # Format the command appropriately for our O/S
@@ -610,35 +605,6 @@ sub run_command {
 
 
 #------------------------------------------------------------------------
-# $self->setup_texinput_paths
-#
-# setup the TEXINPUT path environment variables
-#------------------------------------------------------------------------
-
-sub setup_texinput_paths {
-    my $self = shift;
-    my $context = $self->context;
-    my $template_name = $context->stash->get('template.name');
-    my $include_path  = $context->config->{INCLUDE_PATH} || [];
-    $include_path = [ $include_path ] unless ref $include_path;
-
-    my @texinput_paths = ("");
-    foreach my $path (@$include_path) {
-        my $template_path = File::Spec->catfile($path, $template_name);
-        if (-f $template_path) {
-            my($volume, $dir) = File::Spec->splitpath($template_path);
-            $dir = File::Spec->catfile($volume, $dir);
-            unshift @texinput_paths, $dir;
-            next if $dir eq $path;
-        }
-        push @texinput_paths, $path;
-    }
-    $self->texinput_path(\@texinput_paths);
-    return;
-}
-
-
-#------------------------------------------------------------------------
 # $self->cleanup
 #
 # cleans up the temporary files
@@ -648,6 +614,30 @@ sub cleanup {
     my $self = shift;
     return;
 }
+
+
+#------------------------------------------------------------------------
+# $self->program_path($progname, $optional_value)
+#
+# 
+#------------------------------------------------------------------------
+
+sub program_path {
+    my $class_or_self = shift;
+    my $href     = ref $class_or_self ? $class_or_self->{_program_path} : \%program_path;
+    my $progname = shift;
+
+    return @_ ? ($href->{$progname} = shift) : $href->{$progname};
+}
+
+
+sub latex_path     { my $self = shift; $self->program_path('latex',     @_); }
+sub pdflatex_path  { my $self = shift; $self->program_path('pdflatex',  @_); }
+sub bibtex_path    { my $self = shift; $self->program_path('bibtex',    @_); }
+sub makeindex_path { my $self = shift; $self->program_path('makeindex', @_); }
+sub dvips_path     { my $self = shift; $self->program_path('dvips',     @_); }
+sub dvipdfm_path   { my $self = shift; $self->program_path('dvipdfm',   @_); }
+sub ps2pdf_path    { my $self = shift; $self->program_path('ps2pdf',    @_); }
 
 
 
@@ -761,7 +751,7 @@ C<makeindex>.
 =item C<indexoptions>
 
 Specifies additional options that should be passed to C<makeindex>.
-Useful options are: C<-c> to compress intermdiate blanks in index
+Useful options are: C<-c> to compress intermediate blanks in index
 keys, C<-l> to specify letter ordering rather than word ordering,
 C<-r> to disable implicit range formation.  Refer to L<makeindex(1)>
 for full details.
@@ -830,6 +820,32 @@ resets the stats.
 
 Not yet implemented
 
+
+=item C<latex_path($opt_value)>
+
+Get or set the path to the C<latex> program.  Can be used as a class
+method to set the default path or as an object method to set the path
+for that instance of the driver object.
+
+=item C<pdflatex_path($opt_value)>
+
+Get or set the path to the C<pdflatex> program.  
+
+=item C<bibtex_path($opt_value)>
+
+Get or set the path to the C<bibtex> program.  
+
+=item C<dvipdfm_path($opt_value)>
+
+=item C<dvips_path($opt_value)>
+
+=item C<makeindex_path($opt_value)>
+
+=item C<ps2pdf_path($opt_value)>
+
+=item C<program_path($program_name, $opt_value)>
+
+
 =back
 
 
@@ -837,8 +853,6 @@ There are a number of other methods that are used internally by the
 driver.  Calling these methods directly may lead to unpredictable results.
 
 =over 4
-
-=item C<setup_texinput_paths>
 
 =item C<run_latex>
 

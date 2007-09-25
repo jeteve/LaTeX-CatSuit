@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 10-simpledoc.t 28 2007-09-24 20:32:16Z andrew $
+# $Id: 10-simpledoc.t 38 2007-09-25 20:03:07Z andrew $
 
 use strict;
 use blib;
@@ -23,6 +23,7 @@ tidy_directory($basedir, $docname, $debug);
 
 my $drv = LaTeX::Driver->new( basedir     => $basedir,
 			      basename    => $docname,
+			      outputtype  => 'dvi',
 			      DEBUG       => $debug,
 			      DEBUGPREFIX => '# [latex]: ' );
 
