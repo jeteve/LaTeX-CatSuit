@@ -42,10 +42,12 @@ EOF
 
 our $LATEX     = ttprompt('latex path',     find_program($ENV{PATH}, "latex"));
 our $PDFLATEX  = ttprompt('pdflatex path',  find_program($ENV{PATH}, "pdflatex"));
-our $DVIPS     = ttprompt('dvips path',     find_program($ENV{PATH}, "dvips"));
-our $PS2PDF    = ttprompt('ps2pdf path',    find_program($ENV{PATH}, "ps2pdf"));
 our $BIBTEX    = ttprompt('bibtex path',    find_program($ENV{PATH}, "bibtex"));
 our $MAKEINDEX = ttprompt('makeindex path', find_program($ENV{PATH}, "makeindex"));
+our $DVIPS     = ttprompt('dvips path',     find_program($ENV{PATH}, "dvips"));
+our $DVIPDFM   = ttprompt('dvipdfm path',   find_program($ENV{PATH}, "dvipdfm"));
+our $PS2PDF    = ttprompt('ps2pdf path',    find_program($ENV{PATH}, "ps2pdf"));
+our $PDF2PS    = ttprompt('pdf2ps path',    find_program($ENV{PATH}, "pdf2ps"));
 
 if (!$LATEX and !$PDFLATEX) {
     my $continue = ttprompt('You don\'t seem to have LaTeX installed.  Continue anyway?', 'N');
@@ -54,19 +56,27 @@ if (!$LATEX and !$PDFLATEX) {
 
 fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'latex',     $LATEX);
 fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'pdflatex',  $PDFLATEX);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'dvips',     $DVIPS);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'ps2pdf',    $PS2PDF);
 fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'bibtex',    $BIBTEX);
 fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'makeindex', $MAKEINDEX);
+fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'dvips',     $DVIPS);
+fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'dvipdfm',   $DVIPDFM);
+fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'ps2pdf',    $PS2PDF);
+fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'ps2pdf',    $PDF2PS);
 
 #------------------------------------------------------------------------
 
 my %opts = (
     'NAME'	       => 'LaTeX-Driver',
     'VERSION_FROM' => 'lib/LaTeX/Driver.pm',
+    'EXE_FILES'    => [ 'scripts/latex2dvi', 'scripts/latex2pdf', 'scripts/latex2ps' ],
     'PMLIBDIRS'    => [ 'lib' ], 
     'PREREQ_PM'    => { 
+	'Class::Accessor'  => 0,
+	'Cwd'              => 0,
 	'Exception::Class' => 0,
+	'File::Slurp'      => 0,
+	'File::Spec'       => 0,
+	'IO::File'         => 0,
     },
     'dist'         => {
         'COMPRESS' => 'gzip',

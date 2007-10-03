@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 14-makeindex.t 38 2007-09-25 20:03:07Z andrew $
+# $Id: 14-makeindex.t 62 2007-10-03 14:20:44Z andrew $
 #
 # Test out invocation of makeindex:
 # * Tests the default invocation of makeindex
@@ -22,20 +22,11 @@ use Test::More tests => 16;
 use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
-# Debug configuration
-
-$dont_tidy_up = 0;
-
-# Get the test configuration
-my ($testno, $basedir, $docname) = get_test_params();
-
 tidy_directory($basedir, $docname, $debug);
 
-$drv = LaTeX::Driver->new( basedir     => $basedir,
-			   basename    => $docname,
-			   outputtype  => 'dvi',
-			   DEBUG       => $debug,
-			   DEBUGPREFIX => '# [latex]: ' );
+$drv = LaTeX::Driver->new( source => $docpath,
+			   format => 'dvi',
+			   @DEBUGOPTS );
 
 diag("Checking the formatting of a LaTeX document with an index");
 isa_ok($drv, 'LaTeX::Driver');
@@ -46,9 +37,9 @@ is($drv->formatter, 'latex', "formatter");
 
 ok($drv->run, "formatting $docname");
 
-is($drv->stats->{formatter_runs}, 2, "should have run latex twice");
-is($drv->stats->{bibtex_runs},    0, "should not have run bibtex");
-is($drv->stats->{makeindex_runs}, 1, "should have run makeindex once");
+is($drv->stats->{runs}{latex},         2, "should have run latex twice");
+is($drv->stats->{runs}{bibtex},    undef, "should not have run bibtex");
+is($drv->stats->{runs}{makeindex},     1, "should have run makeindex once");
 
 test_dvifile($drv, [ "Simple Test Document $testno",	# title
 		     'A.N. Other',			# author
@@ -65,12 +56,11 @@ test_dvifile($drv, [ "Simple Test Document $testno",	# title
 tidy_directory($basedir, $docname, $debug);
 
 diag("run again with an explicit index style option");
-$drv = LaTeX::Driver->new( basedir      => $basedir,
-			   basename     => $docname,
-			   indexstyle   => 'testind',
-			   outputtype  => 'dvi',
-			   DEBUG        => $debug,
-			   DEBUGPREFIX  => '# [latex]: ' );
+$drv = LaTeX::Driver->new( source     => $docpath,
+			   format     => 'dvi',
+			   indexstyle => 'testind',
+			   @DEBUGOPTS );
+
 
 isa_ok($drv, 'LaTeX::Driver');
 
@@ -85,12 +75,10 @@ test_dvifile($drv, [ '^Index$',				# Index section heading
 tidy_directory($basedir, $docname, $debug);
 
 diag("run again with -l (letter ordering) option");
-$drv = LaTeX::Driver->new( basedir      => $basedir,
-			   basename     => $docname,
+$drv = LaTeX::Driver->new( source       => $docpath,
+			   format       => 'dvi',
 			   indexoptions => '-l',
-			   outputtype  => 'dvi',
-			   DEBUG        => $debug,
-			   DEBUGPREFIX  => '# [latex]: ' );
+			   @DEBUGOPTS );
 
 isa_ok($drv, 'LaTeX::Driver');
 
@@ -103,6 +91,6 @@ test_dvifile($drv, [ '^Index$',				# Index section heading
 		     '^ 2$' ] );			# page number 2
 
 tidy_directory($basedir, $docname, $debug)
-    unless $dont_tidy_up;
+    unless $no_cleanup;
 
 exit(0);

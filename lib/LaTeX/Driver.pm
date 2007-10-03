@@ -18,7 +18,7 @@
 # HISTORY
 #   * Extracted from the Template::Latex module (AF, 2007-09-10)
 #
-#   $Id: Driver.pm 39 2007-09-25 20:08:17Z andrew $
+#   $Id: Driver.pm 64 2007-10-03 15:03:21Z andrew $
 #========================================================================
 
 package LaTeX::Driver;
@@ -27,17 +27,20 @@ use strict;
 use warnings;
 
 use base 'Class::Accessor';
-use Cwd;
-use English;
+use Cwd;			# from PathTools
+use English;			# standard Perl class
 use Exception::Class ( 'LaTeX::Driver::Exception' );
-use File::Copy;
-use File::Compare;
-use File::Path;
-use File::Spec;
+use File::Copy;			# standard Perl class
+use File::Compare;		# standard Perl class
+use File::Path;			# standard Perl class
+use File::Slurp;
+use File::Spec;			# from PathTools
+use IO::File;			# from IO
 
-our $VERSION = 0.05;
+our $VERSION = 0.06;
 
-__PACKAGE__->mk_accessors( qw( basename basedir basepath options
+__PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
+                               source output tmpdir format
                                formatter preprocessors postprocessors _program_path
                                maxruns extraruns stats texinputs_path
                                undefined_citations undefined_references
@@ -51,35 +54,33 @@ our $DEBUGPREFIX;
 
 eval { require LaTeX::Driver::Paths };
 
-our @PROGRAM_NAMES = qw(latex pdflatex bibtex makeindex dvips dvipdfm ps2pdf);
+our @PROGRAM_NAMES = qw(latex pdflatex bibtex makeindex dvips dvipdfm ps2pdf pdf2ps);
 our %program_path;
 
 map { $program_path{$_} = $LaTeX::Driver::Paths::program_path{$_} || "/usr/bin/$_" } @PROGRAM_NAMES;
 
 
+our @LOGFILE_EXTS = qw( log blg ilg );
+our @TMPFILE_EXTS = qw( aux log lot toc bbl ind idx cit cbk ibk );
+
+
+our $DEFAULT_TMPDIR  = 'latexdrv';
+our $DEFAULT_DOCNAME = 'latexdoc';
 
 # valid output formats and program alias
 
-our $DEFAULT_OUTPUTTYPE = 'pdf';
+our $DEFAULT_FORMAT = 'pdf';
 
-our %OUTPUTTYPE_FORMATTERS  = (
+our %FORMATTERS  = (
     dvi        => [ 'latex' ],
     ps         => [ 'latex', 'dvips' ],
+    postscript => [ 'latex', 'dvips' ],
     pdf        => [ 'pdflatex' ],
     'pdf(dvi)' => [ 'latex', 'dvipdfm' ],
     'pdf(ps)'  => [ 'latex', 'dvips', 'ps2pdf' ],
+    'ps(pdf)'  => [ 'pdflatex', 'pdf2ps' ],
 );
 
-our %FORMATTER_OUTPUTTYPES = (
-    latex    => { default => 'dvi',
-                  dvi => [],
-                  ps  => [ 'dvips' ],
-                  pdf => [ 'dvips', 'ps2pdf' ]
-    },
-    pdflatex => { default => 'pdf',
-                  pdf     => [],
-    },
-);
 
 
 
@@ -92,7 +93,8 @@ our %FORMATTER_OUTPUTTYPES = (
 sub new {
     my $class = shift;
     my $options = ref $_[0] ? shift : { @_ };
-    my (@postprocessors, %path);
+    my ($volume, $basedir, $basename, $basepath, $orig_ext, $cleanup);
+    my ($formatter, @postprocessors, %path);
 
     $DEBUG       = $options->{DEBUG} || 0;
     $DEBUGPREFIX = $options->{DEBUGPREFIX} if exists $options->{DEBUGPREFIX};
@@ -103,73 +105,93 @@ sub new {
         if $OSNAME =~ /^(MacOS|os2|VMS)$/i;
 
 
-    # Examine the options - we need at least a basename to work with
+    # Examine the options - we need at least a source to work with and
+    # it should be a scalar reference or a valid filename.
 
-    $class->throw("no basename specified")
-        unless $options->{basename};
+    my $source = delete $options->{source};
+    $class->throw("no source specified")
+        unless $source;
 
-
-    # The base directory is either taken from the directory part of
-    # the basename or from
-
-    my ($volume, $basedir, $basename) = File::Spec->splitpath($options->{basename});
-    $basename =~ s/\.tex$//;
-    if ($basedir and $volume) {
-        $basedir = File::Spec->catfile($volume, $basedir);
+    if (ref $source) {
+        $class->throw("source is an invalid reference $source")
+            if ref $source ne 'SCALAR';
     }
-    $basedir ||= $options->{basedir} || getcwd;
-    my $basepath = File::Spec->catfile($basedir, $basename);
+    else {
+        $source =~ s/(\.tex)$//;
+        $orig_ext = $1;
+        $class->throw("source file ${source}.tex does not exist")
+            unless -f $source or -f $source . ".tex";
+    }
 
 
-    # Determine how the document is to be processed
+    # Determine how the document is to be processed.  Either specified
+    # explicitly in the format parameter or if an output file is
+    # specified it is taken from that, or the default is take.
 
-    my $formatter  = $options->{ formatter };
-    my $outputtype = $options->{ outputtype } || $options->{ format };
+    my $output = $options->{output};
+    my $format = lc($options->{format});
 
-    # outputtype takes precedence - there is a formatter and zero or
-    # more postprocessors for each output type; there are also special
-    # output types 'pdf(dvi)', 'pdf(ps)' and 'ps(pdf)' that specify
-    # alternate routes to generate the output type.  If a formtter is
-    # specified with an output type then they must be compatible.
+    if ($output and !ref $output) {
+        my ($volume, $dir, $file) = File::Spec->splitpath($output);
+        $class->throw("output directory $dir does not exist")
+            unless $dir and -d $dir;
+        if (!$format and $file =~ /\.(\w+)$/) {
+            $format = lc($1);
+        }
+    }
 
-    if ($outputtype) {
-        $class->throw("invalid output type: '$outputtype'")
-            unless exists $OUTPUTTYPE_FORMATTERS{$outputtype};
-        if ($formatter) {
-            $class->throw("invalid formatter: '$formatter'")
-                unless exists $FORMATTER_OUTPUTTYPES{$formatter};
-            my $formatter_attrs = $FORMATTER_OUTPUTTYPES{$formatter};
-            $outputtype = $formatter_attrs->{default} if $outputtype eq 'default';
-            $class->throw(sprintf("cannot produce output type '%s' with formatter '%s'",
-                                  $outputtype, $formatter))
-                unless exists $formatter_attrs->{$outputtype};
-            @postprocessors = @{$formatter_attrs->{$outputtype}};
+
+    # There is a formatter and zero or more postprocessors for each
+    # format; there are also special formats 'pdf(dvi)', 'pdf(ps)' and
+    # 'ps(pdf)' that specify alternate routes to generate the format.
+
+    $format ||= $DEFAULT_FORMAT;
+    $class->throw("invalid output format: '$format'")
+        unless exists $FORMATTERS{$format};
+
+    ($formatter, @postprocessors) = @{$FORMATTERS{$format}};
+
+    # discard the parenthesized part of special formats
+
+    $format =~ s/\(.*\)//;
+
+
+    # If a temporary directory was specified or the LaTeX source was
+    # given as a scalar reference then a temporary directory is
+    # created and the document source written to that directory or
+    # copied in if the source is a file.
+
+    my $tmpdir = $options->{tmpdir};
+    if ($tmpdir or ref $source) {
+        $basedir = $class->_setup_tmpdir($tmpdir);
+        $cleanup = 'rmdir' if (!defined($tmpdir) or ($tmpdir eq "1"));
+        if (ref $source) {
+            $basename = $DEFAULT_DOCNAME; 
+            $basepath = File::Spec->catfile($basedir, $basename);
+            write_file($basepath . ".tex", $source)
+                or $class->throw("cannot create temporary latex file");
         }
         else {
-            $outputtype = $DEFAULT_OUTPUTTYPE if $outputtype eq 'default';
-            ($formatter, @postprocessors) = @{$OUTPUTTYPE_FORMATTERS{$outputtype}};
+            ($basename = $source) =~ s{.*/}{};
+            $basepath = File::Spec->catfile($basedir, $basename);
+            copy("$source$orig_ext", $basepath . ".tex")
+                or $class->throw("cannot copy $source$orig_ext to temporary directory");
+            $output  ||= $source . '.' . $format;
         }
     }
 
-    # If a formatter is specified but no outputtype then the output
-    # type and postprocessors are taken from the attributes of the
-    # formatter.
-
-    elsif ($formatter) {
-        $class->throw("invalid formatter: '$formatter'")
-            unless exists $FORMATTER_OUTPUTTYPES{$formatter};
-        my $formatter_attrs = $FORMATTER_OUTPUTTYPES{$formatter};
-        $outputtype         = $formatter_attrs->{default};
-        @postprocessors     = @{$formatter_attrs->{$outputtype}};
-    }
-
-    # If neither formatter or outputtype is specified then the default
-    # output type is selected and the formatter and postprocessors
-    # selected from that output type.
+    # Otherwise the source was given as a filename, so the base name
+    # and directory are taken from the source name.
 
     else {
-        $outputtype = $DEFAULT_OUTPUTTYPE;
-        ($formatter, @postprocessors) = @{$OUTPUTTYPE_FORMATTERS{$outputtype}};
+        ($volume, $basedir, $basename) = File::Spec->splitpath($source);
+        $basename =~ s/\.tex$//;
+        if ($basedir and $volume) {
+            $basedir = File::Spec->catfile($volume, $basedir);
+        }
+        $basedir ||= getcwd;
+        $basedir =~ s{(.)/$}{$1};
+        $basepath = File::Spec->catfile($basedir, $basename);
     }
 
 
@@ -191,22 +213,24 @@ sub new {
     my $texinputs_path = $options->{TEXINPUTS} || $options->{texinputs} || [];
     $texinputs_path = [ split(/:/, $texinputs_path) ] unless ref $texinputs_path;
 
+
     # construct and return the object
 
-    return $class->SUPER::new({ basename       => $basename,
-                                basedir        => $basedir,
-                                basepath       => $basepath,
-                                options        => $options,
-                                maxruns        => $options->{maxruns}   || 10,
-                                extraruns      => $options->{extraruns} ||  0,
-                                formatter      => $formatter,
-                                _program_path  => $path,
-                                texinputs_path => join(':', ('.', @$texinputs_path, '')),
-                                preprocessors  => [],
-                                postprocessors => \@postprocessors,
-                                stats          => { formatter_runs => 0,
-                                                    bibtex_runs    => 0,
-                                                    makeindex_runs => 0 } });
+    return $class->SUPER::new( { basename       => $basename,
+                                 basedir        => $basedir,
+                                 basepath       => $basepath,
+                                 format         => $format,
+                                 output         => $output,
+                                 cleanup        => $cleanup || '',
+                                 options        => $options,
+                                 maxruns        => $options->{maxruns}   || 10,
+                                 extraruns      => $options->{extraruns} ||  0,
+                                 formatter      => $formatter,
+                                 _program_path  => $path,
+                                 texinputs_path => join(':', ('.', @$texinputs_path, '')),
+                                 preprocessors  => [],
+                                 postprocessors => \@postprocessors,
+                                 stats          => { runs => {} } } );
     
 }
 
@@ -214,7 +238,7 @@ sub new {
 #------------------------------------------------------------------------
 # run()
 #
-# Constructor for the Latex driver
+# Runs the formatter and other programs to generate the ouptut.
 #------------------------------------------------------------------------
 
 sub run {
@@ -241,14 +265,14 @@ sub run {
   RUN:
     foreach my $run (1 .. $maxruns) {
 
-        if ($self->latex_required) {
+        if ($self->need_to_run_latex) {
             $self->run_latex;
         }
         else {
-            if ($self->bibtex_required) {
+            if ($self->need_to_run_bibtex) {
                 $self->run_bibtex;
             }
-            elsif ($self->makeindex_required) {
+            elsif ($self->need_to_run_makeindex) {
                 $self->run_makeindex;
             }
             else {
@@ -280,7 +304,25 @@ sub run {
 
     # Return any output
 
+    $self->copy_to_output if $self->output;
+        ;
+
     return 1;
+}
+
+
+
+#------------------------------------------------------------------------
+# destructor
+#
+#------------------------------------------------------------------------
+
+sub DESTROY {
+    my $self = shift;
+
+    debug('DESTROY called') if $DEBUG;
+
+    $self->cleanup();
 }
 
 
@@ -297,8 +339,6 @@ sub run_latex {
     my $exitcode = $self->run_command($self->formatter =>
                                       "\\nonstopmode\\def\\TTLATEX{1}\\input{$basename}");
 
-    $self->stats->{formatter_runs}++;
-
     # If an error occurred attempt to extract the interesting lines
     # from the log file.  Even without errors the log file may contain
     # interesting warnings indicating that LaTeX or one of its friends
@@ -307,10 +347,10 @@ sub run_latex {
     my $errors = "";
     my $logfile = $self->basepath . ".log";
 
-    if (open(FH, "<", $logfile) ) {
+    if (my $fh = new IO::File $logfile, "r") {
         $self->reset_latex_required;
         my $matched = 0;
-        while ( <FH> ) {
+        while ( <$fh> ) {
             debug($_) if $DEBUG >= 9;
             # TeX errors start with a "!" at the start of the
             # line, and followed several lines later by a line
@@ -346,7 +386,6 @@ sub run_latex {
                 $self->labels_changed(1);
             }
         }
-        close(FH);
     }
     else {
         $errors = "failed to open $logfile for input";
@@ -355,6 +394,9 @@ sub run_latex {
     if ($exitcode or $errors) {
         $self->throw($self->formatter . " exited with errors:\n$errors");
     }
+
+    $self->stats->{runs}{formatter}++;
+
     return;
 }
 
@@ -366,7 +408,7 @@ sub reset_latex_required {
     return;
 }
 
-sub latex_required {
+sub need_to_run_latex {
     my $self = shift;
 
     my $auxfile = $self->basepath . '.aux';
@@ -394,8 +436,6 @@ sub run_bibtex {
     my $basename = $self->basename;
     my $exitcode = $self->run_command(bibtex => $basename, 'BIBINPUTS');
 
-    $self->stats->{bibtex_runs}++;
-
     # TODO: extract meaningful error message from .blg file
 
     $self->throw("bibtex $basename failed ($exitcode)")
@@ -415,7 +455,7 @@ sub run_bibtex {
 
 
 #------------------------------------------------------------------------
-# $self->bibtex_required
+# $self->need_to_run_bibtex
 #
 # LaTeX reports 'Citation ... undefined' if it sees a citation
 # (\cite{xxx}, etc) and hasn't read a \bibcite{xxx}{yyy} from the aux
@@ -431,25 +471,23 @@ sub run_bibtex {
 # check saves an extra run of bibtex and latex.
 #------------------------------------------------------------------------
 
-sub bibtex_required {
+sub need_to_run_bibtex {
     my $self = shift;
 
     if ($self->undefined_citations) {
         my $auxfile = $self->basepath . ".aux";
         my $citfile = $self->basepath . ".cit";
         my $cbkfile = $self->basepath . ".cbk";
-        local(*AUXFH);
-        local(*CITFH);
 
-        open(AUXFH, '<', $auxfile) || return;
-        open(CITFH, '>', $citfile)
+        my $auxfh = new IO::File $auxfile, "r" or return;
+        my $citfh = new IO::File $citfile, "w"
             or $self->throw("failed to open $citfile for output: $!");
 
-        while ( <AUXFH> ) {
-            print(CITFH $_) if /^\\citation/;
+        while ( <$auxfh> ) {
+            print($citfh $_) if /^\\citation/;
         }
-        close(AUXFH);
-        close(CITFH);
+        undef $auxfh;
+        undef $citfh;
 
         return if -e $cbkfile and (compare($citfile, $cbkfile) == 0);
         return 1;
@@ -483,8 +521,6 @@ sub run_makeindex {
     }
     my $exitcode = $self->run_command(makeindex => join(" ", (@args, $basename)));
 
-    $self->stats->{makeindex_runs}++;
-
     # TODO: extract meaningful error message from .ilg file
 
     $self->throw("makeindex $basename failed ($exitcode)")
@@ -503,13 +539,13 @@ sub run_makeindex {
 
 
 #------------------------------------------------------------------------
-# $self->makeindex_required()
+# $self->need_to_run_makeindex()
 #
 # Determine whether makeindex needs to be run.  Checks that there is a
 # raw index file and that it differs from the backup file (if that exists).
 #------------------------------------------------------------------------
 
-sub makeindex_required {
+sub need_to_run_makeindex {
     my $self = shift;
 
     my $basepath = $self->basepath;
@@ -561,6 +597,25 @@ sub run_ps2pdf {
 
 
 #------------------------------------------------------------------------
+# $self->run_pdf2ps()
+#
+# Run ps2pdf to generate PostScript from PDF output
+#------------------------------------------------------------------------
+
+sub run_pdf2ps {
+    my $self = shift;
+
+    my $basename = $self->basename;
+
+    my $exitstatus = $self->run_command(pdf2ps => sprintf("%s.pdf %s.ps", $basename, $basename));
+
+    $self->throw("pdf2ps $basename failed ($exitstatus)")
+        if $exitstatus;
+    return;
+}
+
+
+#------------------------------------------------------------------------
 # $self->run_command($progname, $config, $dir, $args, $env)
 #
 # Run a command in the specified directory, setting up the environment
@@ -580,22 +635,28 @@ sub run_command {
 
     $args ||= '';
 
-    # Set up environment variables
+
+    # Set up localized environment variables in preparation for running the command
+    # Note that the localized hash slice assignment of %ENV ensures that
+    # the localization is done at the same block level as the system().
+    # Even doing something like  local($ENV{$_}) = $val for @{$envvars} 
+    # puts the localization in a deeper level block so the previous value
+    # is restored before the system() call is made.
+
     $envvars ||= "TEXINPUTS";
     $envvars = [ $envvars ] unless ref $envvars;
-    $envvars = join(" ", ( map { sprintf('%s=%s', $_, $self->texinputs_path) } @{$envvars} ) );
-
+    local(@ENV{@{$envvars}}) = map { $self->texinputs_path } @{$envvars};
 
     # Format the command appropriately for our O/S
     if ($OSNAME eq 'MSWin32') {
-        # This doesn't set the environment variables yet - what's the syntax?
         $cmd = "cmd /c \"cd $dir && $program $args\"";
     }
     else {
         $args = "'$args'" if $args =~ / \\ /mx;
-        $cmd  = "cd $dir; $envvars $program $args 1>$null 2>$null 0<$null";
+        $cmd  = "cd $dir; $program $args 1>$null 2>$null 0<$null";
     }
 
+    $self->stats->{runs}{$progname}++;
     debug("running '$program $args'") if $DEBUG;
 
     my $exitstatus = system($cmd);
@@ -603,15 +664,89 @@ sub run_command {
 }
 
 
+#------------------------------------------------------------------------
+# $self->copy_to_output
+#
+#------------------------------------------------------------------------
+
+sub copy_to_output {
+    my $self = shift;
+    my $output = $self->output or return;
+
+    # construct file name of the generated document
+    my $file = $self->basepath . '.' . $self->format;
+
+    if (ref $output) {
+        $$output = read_file($file);
+    }
+    else {
+        # see if we can rename the generate file to the desired output 
+        # file - this may fail, e.g. across filesystem boundaries (and
+        # it's quite common for /tmp to be a separate filesystem
+
+        if (rename($file, $output)) {
+            debug("renamed $file to $output") if $DEBUG;
+        }
+        elsif (copy($file, $output)) {
+            debug("copied $file to $output") if $DEBUG;
+        }
+        else {
+            $self->throw("failed to copy $file to $output");
+        }
+    }
+    return;
+}
+
+
+
+#------------------------------------------------------------------------
+# _setup_tmpdir($dirname)
+#
+# create a temporary directory 
+#------------------------------------------------------------------------
+
+sub _setup_tmpdir {
+    my ($class, $dirname) = @_;
+
+    my $tmp  = File::Spec->tmpdir();
+
+    if ($dirname and ($dirname ne 1)) {
+        $dirname = File::Spec->catdir($tmp, $dirname);
+        eval { mkpath($dirname, 0, 0700) } unless -d $dirname;
+    }
+    else {
+        my $n = 0;
+        do { 
+            $dirname = File::Spec->catdir($tmp, "$DEFAULT_TMPDIR$$" . '_' . $n++);
+        } while (-e $dirname);
+        eval { mkpath($dirname, 0, 0700) };
+    }
+    $class->throw("failed to create temporary directory: $@") 
+        if $@;
+
+    debug(sprintf("setting up temporary directory '%s'\n", $dirname)) if $DEBUG;
+
+    return $dirname;
+}
+
 
 #------------------------------------------------------------------------
 # $self->cleanup
 #
 # cleans up the temporary files
+# TODO: work out exactly what this should do
 #------------------------------------------------------------------------
 
 sub cleanup {
-    my $self = shift;
+    my ($self, $what) = @_;
+    my $cleanup = $self->{cleanup};
+    debug('cleanup called') if $DEBUG;
+    if ($cleanup eq 'rmdir') {
+        if (!defined($what) or ($what ne 'none')) {
+            debug('cleanup removing directory tree ' . $self->basedir) if $DEBUG;
+            rmtree($self->basedir);
+        }
+    }
     return;
 }
 
@@ -631,15 +766,6 @@ sub program_path {
 }
 
 
-sub latex_path     { my $self = shift; $self->program_path('latex',     @_); }
-sub pdflatex_path  { my $self = shift; $self->program_path('pdflatex',  @_); }
-sub bibtex_path    { my $self = shift; $self->program_path('bibtex',    @_); }
-sub makeindex_path { my $self = shift; $self->program_path('makeindex', @_); }
-sub dvips_path     { my $self = shift; $self->program_path('dvips',     @_); }
-sub dvipdfm_path   { my $self = shift; $self->program_path('dvipdfm',   @_); }
-sub ps2pdf_path    { my $self = shift; $self->program_path('ps2pdf',    @_); }
-
-
 
 #------------------------------------------------------------------------
 # throw($error)
@@ -649,7 +775,6 @@ sub ps2pdf_path    { my $self = shift; $self->program_path('ps2pdf',    @_); }
 
 sub throw {
     my $self = shift;
-    $self->cleanup;
     LaTeX::Driver::Exception->throw( error => join('', @_) );
 }
 
@@ -670,15 +795,16 @@ LaTeX::Driver - Latex driver
 
 =head1 VERSION
 
-This document describes version 0.04 of C<LaTeX::Driver>.
+This document describes version 0.06 of C<LaTeX::Driver>.
 
 =head1 SYNOPSIS
 
     use LaTeX::Driver;
 
-    $drv = LaTeX::Driver->new( basename  => $basename,
-                               formatter => 'pdflatex',
-                               %other_options );
+    $drv = LaTeX::Driver->new( source  => \$doc_text,
+                               output  => $filename,
+                               format  => 'pdf',
+                               %other_params );
     $ok    = $drv->run;
     $stats = $drv->stats;
     $drv->cleanup($what);
@@ -702,38 +828,57 @@ created.  These can be removed with the C<cleanup> method.
 
 =over 4
 
-=item C<new(%options)>
+=item C<new(%params)>
 
-This is the constructor method.  It takes the following options:
+This is the constructor method.  It creates a driver object on which
+the C<run> method is used to format the document specified.  The main
+arguments are C<source> and C<output>; the C<source> argument is
+required to specify the input document; C<output> is only mandatory if
+C<source> is a scalar reference.
+
+The full list of arguments is as follows:
 
 =over 4
 
-=item C<basename>
+=item C<source>
 
-The base name of the document to be formatted.  This is mandatory.
-The name may include the directory, in which case that is taken as the
-base directory (overriding any value of C<basedir>).  If the basename
-includes a C<.tex> suffix that is stripped off.
+This parameter is mandatory; it can either specify the name of the
+document to be formatted or be a reference to a scalar containing the
+document source.
 
-=item C<basedir>
+=item C<output>
 
-The base directory of the document to be formatted.  If C<basename>
-contains a directory part then that is used, if not and C<basedir> is
-not specified then the current directory is used.
+specifies the output for the formatted document; this may either be a
+file name or be a scalar reference.  In the latter case the contents
+of the formatted document file is copied into the scalar variable
+referenced.
 
-=item C<formatter>
+=item C<format>
 
-The name of the formatter to be used (either C<latex> or C<pdflatex>).
+the format of output required: one of C<"dvi"> (TeX Device Independent
+format), C<"ps"> (PostScript) or C<"pdf"> (Adobe Portable Document
+Format).  The follow special values are also accepted: C<"pdf(ps)">
+(generates PDF via PostScript, using C<dvips> and C<ps2pdf>),
+C<"pdf(dvi)"> (generates PDF via dvi, using C<dvipdfm>).  If not
+specified then the format is determined from the name of the output
+document if specified, or defaults to PDF.
+
+=item C<tmpdir>
+
+Specifies whether the formatting should be done in a temporary
+directory in which case the source document is copied into the
+directory before formatting.  This option can either take the value 1,
+in which case a temporary directory is automatically generated, or it
+is taken as the name of a subdirectory of the system temporary
+directory.  A temporary directory is always created if the source
+document is specified as a scalar reference.
+
 
 =item C<paths>
 
 Specifies a mapping of program names to full pathname as a hash
 reference.  These paths override the paths determined at installation
 time.
-
-=item C<outputtype>
-
-The type of output required (C<dvi>, C<pdf> or C<ps>)
 
 =item C<maxruns>
 
@@ -742,6 +887,15 @@ The maximum number of runs of the formatter program (defaults to 10).
 =item C<extraruns>
 
 The number of additional runs of the formatter program after the document has stabilized.
+
+=item C<cleanup>
+
+Specifies whether temporary files and directories should be
+automatically removed when the object destructor is called.  Accepted
+values are C<none> (do no cleanup), C<logfiles> (remove log files) and
+C<tempfiles> (remove log and temporary files).  By default the
+destructor will remove the entire contents of any automatically
+generated temporary directory, but will leave all other files intact.
 
 =item C<indexstyle>
 
@@ -756,6 +910,19 @@ keys, C<-l> to specify letter ordering rather than word ordering,
 C<-r> to disable implicit range formation.  Refer to L<makeindex(1)>
 for full details.
 
+=item C<texinputs>
+
+Specifies one or more directories to be searched for LaTeX files.  
+
+=item C<DEBUG>
+
+Enables debug statements if set to a non-zero value.
+
+=item C<DEBUGPREFIX>
+
+Sets the debug prefix, which is prepended to debug output if debug
+statements.  By default there is no prefix.
+
 =back
 
 The constructor performs sanity checking on the options and will die
@@ -765,21 +932,11 @@ if the following conditions are detected:
 
 =item *
 
-no base name is specified
+no source is specified
 
 =item *
 
-an invalid outputtype is specified
-
-=item *
-
-an invalid formatter is specified
-
-=item *
-
-a formatter and an outputtype are specified but the formatter is not
-able to generate the specified output type (even with known
-postprocessors).
+an invalid format is specified
 
 =back
 
@@ -798,17 +955,9 @@ tht was performed, containing the following items:
 
 =over 4
 
-=item C<formatter_runs>
+=item C<runs>
 
-number of times C<latex> or C<pdflatex> was run
-
-=item C<bibtex_runs>
-
-number of times C<bibtex> was run
-
-=item C<makeindex_runs>
-
-number of times C<makeindex> was run
+hash of the number of times each of the programs was run
 
 =back
 
@@ -821,30 +970,11 @@ resets the stats.
 Not yet implemented
 
 
-=item C<latex_path($opt_value)>
-
-Get or set the path to the C<latex> program.  Can be used as a class
-method to set the default path or as an object method to set the path
-for that instance of the driver object.
-
-=item C<pdflatex_path($opt_value)>
-
-Get or set the path to the C<pdflatex> program.  
-
-=item C<bibtex_path($opt_value)>
-
-Get or set the path to the C<bibtex> program.  
-
-=item C<dvipdfm_path($opt_value)>
-
-=item C<dvips_path($opt_value)>
-
-=item C<makeindex_path($opt_value)>
-
-=item C<ps2pdf_path($opt_value)>
-
 =item C<program_path($program_name, $opt_value)>
 
+Get or set the path to the named program.  Can be used as a class
+method to set the default path or as an object method to set the path
+for that instance of the driver object.
 
 =back
 
@@ -858,17 +988,17 @@ driver.  Calling these methods directly may lead to unpredictable results.
 
 Runs the formatter (C<latex> or C<pdflatex>.
 
-=item C<latex_required>
+=item C<need_to_run_latex>
 
 =item C<reset_latex_required>
 
 =item C<run_bibtex>
 
-=item C<bibtex_required>
+=item C<need_to_run_bibtex>
 
 =item C<run_makeindex>
 
-=item C<makeindex_required>
+=item C<need_to_run_makeindex>
 
 =item C<run_dvips>
 

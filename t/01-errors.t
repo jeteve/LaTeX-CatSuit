@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # Script to test LaTeX::Driver's error handling
-# $Id: 01-errors.t 32 2007-09-24 20:57:19Z andrew $
+# $Id: 01-errors.t 50 2007-09-28 10:51:47Z andrew $
 
 use strict;
 use blib;
@@ -21,16 +21,7 @@ BEGIN {
 use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
-plan tests => 11;
-
-# Debug configuration
-
-$dont_tidy_up = 0;
-$debugprefix  = '# [latex]: ';
-
-
-# Get the test configuration
-($testno, $basedir, $docname) = get_test_params();
+plan tests => 4;
 
 
 # For some of our tests we need a directory that does not exist, we
@@ -43,38 +34,14 @@ die "hey, someone created our non-existent directory" if -d $nonexistent_dir;
 diag("testing constructor error handling");
 
 dies_ok { LaTeX::Driver->new( DEBUG       => $debug,
-			      DEBUGPREFIX => $debugprefix ) } 'no basename specified';
-like($@, qr{no basename specified}, 'constructor fails without a basename');
+			      DEBUGPREFIX => $debugprefix ) } 'no source specified';
+like($@, qr{no source specified}, 'constructor fails without a source');
 
-dies_ok { LaTeX::Driver->new( basedir     => $basedir,
-			      basename    => $docname,
-			      outputtype  => 'tiff',
+dies_ok { LaTeX::Driver->new( source      => $docpath,
+			      format      => 'tiff',
 			      DEBUG       => $debug,
 			      DEBUGPREFIX => $debugprefix ) } 'unsupported output type';
-like($@, qr{invalid output type}, "'tiff' is not a supported output type");
-
-dies_ok { LaTeX::Driver->new( basedir     => $basedir,
-			      basename    => $docname,
-			      formatter   => 'pdflatex',
-			      outputtype  => 'dvi',
-			      DEBUG       => $debug,
-			      DEBUGPREFIX => $debugprefix ) } 'incompatible outputtype and formatter';
-like($@, qr{cannot produce output type}, "pdflatex cannot generate dvi output");
-
-dies_ok { LaTeX::Driver->new( basedir     => $basedir,
-			      basename    => $docname,
-			      formatter   => 'troff',
-			      DEBUG       => $debug,
-			      DEBUGPREFIX => $debugprefix ) } 'invalid formatter';
-like($@, qr{invalid formatter}, "'troff' is not (yet?) a valid formatter");
-
-lives_ok { $drv = LaTeX::Driver->new( basedir     => $nonexistent_dir,
-				      basename    => $docname,
-				      DEBUG       => $debug,
-				      DEBUGPREFIX => $debugprefix ) } 'constructor call on non-existent file succeeds';
-dies_ok { $drv->run } 'trying to run formatter in non-existent directory';
-
-like($@, qr{file .* does not exist}, "running driver on a non-existent file fails correctly");
+like($@, qr{invalid output format}, "'tiff' is not a supported output type");
 
 exit(0);
 

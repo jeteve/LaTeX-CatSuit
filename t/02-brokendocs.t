@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 10-simpledoc.t 13 2007-09-21 22:56:47Z andrew $
+# $Id: 02-brokendocs.t 62 2007-10-03 14:20:44Z andrew $
 
 use strict;
 use blib;
@@ -20,18 +20,10 @@ use LaTeX::Driver;
 
 plan tests => 10;
 
-# Debug configuration
-
-my $dont_tidy_up = 0;
-
-# Get the test configuration
-my ($testno, $basedir, $docname) = get_test_params();
-
 tidy_directory($basedir, $docname, $debug);
 
-my $drv = LaTeX::Driver->new( basedir     => $basedir,
-			      basename    => $docname,
-			      outputtype  => 'dvi',
+my $drv = LaTeX::Driver->new( source      => $docpath,
+			      format      => 'dvi',
 			      DEBUG       => $debug,
 			      DEBUGPREFIX => '# [latex]: ' );
 
@@ -44,14 +36,14 @@ is($drv->formatter, 'latex', "formatter");
 
 throws_ok( sub { $drv->run }, 'LaTeX::Driver::Exception', "formatting broken document $docname");
 
-is($drv->stats->{formatter_runs}, 1, "should have run latex once");
-is($drv->stats->{bibtex_runs},    0, "should not have run bibtex");
-is($drv->stats->{makeindex_runs}, 0, "should not have run makeindex");
+is($drv->stats->{runs}{latex},         1, "should have run latex once");
+is($drv->stats->{runs}{bibtex},    undef, "should not have run bibtex");
+is($drv->stats->{runs}{makeindex}, undef, "should not have run makeindex");
 
 
 test_dvifile($drv, [ 'This is a test document with a broken LaTeX command.' ] );
 
 tidy_directory($basedir, $docname, $debug)
-    unless $dont_tidy_up;
+    unless $no_cleanup;
 
 exit(0);

@@ -6,6 +6,7 @@ TODO
 Makefile.PL                    
 lib/LaTeX/Driver.pm
 lib/LaTeX/Driver/Paths.pm
+lib/LaTeX/Driver/FilterProgram.pm
 t/README
 t/00-basic.t
 t/01-errors.t
@@ -35,4 +36,7 @@ t/testdata/20-complexdoc/20-complexdoc.tex
 t/testdata/20-complexdoc/testbib.bib
 t/testdata/20-complexdoc/testinc.tex
 t/lib/Test/LaTeX/Driver.pm
+scripts/latex2dvi
+scripts/latex2pdf
+scripts/latex2ps
 META.yml                                 Module meta-data (added by MakeMaker)

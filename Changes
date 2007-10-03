@@ -10,8 +10,25 @@
 #
 #
 #------------------------------------------------------------------------
-# $Id: Changes 41 2007-09-25 20:14:49Z andrew $
+# $Id: Changes 60 2007-09-28 14:44:51Z andrew $
 #========================================================================
+
+
+#------------------------------------------------------------------------
+# Version 0.06 - 2007-09-27
+#------------------------------------------------------------------------
+
+* rationalized the constructor arguments - now the source and output
+  are controlled just by three arguments: "source" and optionally
+  "output" and "format".
+
+* the "source" and "output" parameters can be scalar references, in
+  which case the LaTeX source and formatted output is taken from or
+  output to the variables referenced respectively.  This facilitates
+  the creation of Unix filter type scripts.
+
+* added the Unix-style filter programs latex2dvi, latex2pdf and
+  latex2ps (these use the common module LaTeX::Driver::FilterProgram)
 
 
 #------------------------------------------------------------------------

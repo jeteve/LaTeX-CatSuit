@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 20-complexdoc.t 36 2007-09-25 20:02:12Z andrew $
+# $Id: 20-complexdoc.t 62 2007-10-03 14:20:44Z andrew $
 
 use strict;
 use blib;
@@ -13,22 +13,13 @@ use Test::More tests => 11;
 use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
-# Debug configuration
-
-my $dont_tidy_up = 1;
-
-# Get the test configuration
-my ($testno, $basedir, $docname) = get_test_params();
-
-
 tidy_directory($basedir, $docname, $debug);
 
-my $drv = LaTeX::Driver->new( basedir     => $basedir,
-			      basename    => $docname,
-			      outputtype  => 'dvi',
-			      TEXINPUTS   => [ "$Bin/testdata/00-common"],
-			      DEBUG       => $debug,
-			      DEBUGPREFIX => '# [latex]: ' );
+my $drv = LaTeX::Driver->new( source    => $docpath,
+			      format    => 'dvi',
+			      TEXINPUTS => [ "$Bin/testdata/00-common"],
+			      @DEBUGOPTS );
+
 
 diag("Checking the formatting of a complex LaTeX document with references, a bibliography, an index, etc");
 isa_ok($drv, 'LaTeX::Driver');
@@ -39,10 +30,10 @@ is($drv->formatter, 'latex', "formatter");
 
 ok($drv->run, "formatting $docname");
 
-cmp_ok($drv->stats->{formatter_runs}, '>=',  5, "should have run latex at least five times");
-cmp_ok($drv->stats->{formatter_runs}, '<=',  8, "should have run latex not more than eight times");
-is($drv->stats->{bibtex_runs},    1, "should have run bibtex once");
-is($drv->stats->{makeindex_runs}, 2, "should have run makeindex twice");
+cmp_ok($drv->stats->{runs}{latex}, '>=',  5, "should have run latex at least five times");
+cmp_ok($drv->stats->{runs}{latex}, '<=',  8, "should have run latex not more than eight times");
+is($drv->stats->{runs}{bibtex},    1, "should have run bibtex once");
+is($drv->stats->{runs}{makeindex}, 2, "should have run makeindex twice");
 
 
 test_dvifile($drv, [ "Complex Test Document $testno",	# title
@@ -74,6 +65,6 @@ test_dvifile($drv, [ "Complex Test Document $testno",	# title
 		     'Colophon$' ] );
 
 tidy_directory($basedir, $docname, $debug)
-    unless $dont_tidy_up;
+    unless $no_cleanup;
 
 exit(0);

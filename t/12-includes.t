@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 12-includes.t 38 2007-09-25 20:03:07Z andrew $
+# $Id: 12-includes.t 62 2007-10-03 14:20:44Z andrew $
 
 use strict;
 use blib;
@@ -13,20 +13,11 @@ use Test::More tests => 10;
 use Test::LaTeX::Driver;
 use LaTeX::Driver;
 
-# Debug configuration
-
-my $dont_tidy_up = 0;
-
-# Get the test configuration
-my ($testno, $basedir, $docname) = get_test_params();
-
 tidy_directory($basedir, $docname, $debug);
 
-my $drv = LaTeX::Driver->new( basedir     => $basedir,
-			      basename    => $docname,
-			      outputtype  => 'dvi',
-			      DEBUG       => $debug,
-			      DEBUGPREFIX => '# [latex]: ' );
+my $drv = LaTeX::Driver->new( source => $docpath,
+			      format => 'dvi',
+			      @DEBUGOPTS );
 
 diag("Checking the formatting of a LaTeX document that includes other files");
 isa_ok($drv, 'LaTeX::Driver');
@@ -37,9 +28,9 @@ is($drv->formatter, 'latex', "formatter");
 
 ok($drv->run, "formatting $docname");
 
-is($drv->stats->{formatter_runs}, 1, "should have run latex once");
-is($drv->stats->{bibtex_runs},    0, "should not have run bibtex");
-is($drv->stats->{makeindex_runs}, 0, "should not have run makeindex");
+is($drv->stats->{runs}{latex},         1, "should have run latex once");
+is($drv->stats->{runs}{bibtex},    undef, "should not have run bibtex");
+is($drv->stats->{runs}{makeindex}, undef, "should not have run makeindex");
 
 test_dvifile($drv, [ "Simple Test Document $testno",	# title
 		     'A.N. Other',			# author
@@ -50,6 +41,6 @@ test_dvifile($drv, [ "Simple Test Document $testno",	# title
 		     '^ 2$' ] );			# page number 2
 
 tidy_directory($basedir, $docname, $debug)
-    unless $dont_tidy_up;
+    unless $no_cleanup;
 
 exit(0);

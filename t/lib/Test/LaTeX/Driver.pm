@@ -18,7 +18,7 @@
 #   * New file - but portions extracted from the Template::Latex
 #     module (AF, 2007-09-19)
 #
-#   $Id: Driver.pm 28 2007-09-24 20:32:16Z andrew $
+#   $Id: Driver.pm 49 2007-09-28 10:50:09Z andrew $
 #
 # TODO
 #   * finish off commenting and documentation
@@ -42,19 +42,28 @@ require Exporter;
 
 
 our @ISA    = qw(Exporter);
-our @EXPORT = qw(get_test_params test_dvifile tidy_directory find_program dvitype $debug);
+our @EXPORT = qw(get_test_params test_dvifile tidy_directory find_program dvitype
+                 $testno $basedir $docname $docpath
+                 $debug $debug_prefix @DEBUGOPTS $no_cleanup);
 
 our $WIN32  = ($^O eq 'MSWin32');
 
 our $level  = 0;
 our $debug  = 0;
+our $no_cleanup = 0;
+our $debug_prefix  = '# [latex]: ';
+
 my $dvitype = find_program($ENV{PATH}, "dvitype");
 
-GetOptions("debug" => \$debug,
-           "level=i" => \$level);
+GetOptions("debug"      => \$debug,
+           "level=i"    => \$level,
+           "no_cleanup" => \$no_cleanup);
 
 $debug = $level if $level;
 
+our @DEBUGOPTS = ( DEBUG => $debug, DEBUGPREFIX => $debug_prefix);
+
+our ($testno, $basedir, $docname, $docpath) = get_test_params();
 
 sub get_test_params {
     my $basename = $0;
@@ -63,7 +72,8 @@ sub get_test_params {
     my ($testno) = $basename =~ m/^(\d+)/;
     die "cannot determine test no from script name $0" unless $testno;
     my $basedir      = "$Bin/testdata/$basename";
-    return ($testno, $basedir, $basename);
+    my $docpath = "$basedir/${basename}.tex";
+    return ($testno, $basedir, $basename, $docpath);
 }
 
 
