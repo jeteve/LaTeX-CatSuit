@@ -18,7 +18,7 @@
 #
 #------------------------------------------------------------------------
 #
-# $Id: latex2dvi 59 2007-09-28 14:39:34Z andrew $
+# $Id: latex2dvi 73 2007-10-12 23:11:27Z andrew $
 #
 #========================================================================
 
@@ -29,7 +29,7 @@ use LaTeX::Driver::FilterProgram;
 
 LaTeX::Driver::FilterProgram->execute(format => 'dvi');
 
-exit(0);
+exit 0;
 
 __END__
 
@@ -37,7 +37,7 @@ __END__
 
 latex2dvi - script to convert LaTeX file to DVI
 
-=head1 SYNOPSIS
+=head1 USAGE
 
   latex2dvi [OPTIONS] [-o output] [sourcefile]
 
@@ -48,6 +48,49 @@ to convert a LaTeX file to DVI (TeX's device independent output format).
 
 TO BE EXPANDED
 
+=head1 REQUIRED ARGUMENTS
+
+=head1 OPTIONS
+
+=over 4
+
+=item C<-output=FILE>
+
+specifies that the formatted file should be written to C<FILE>.  If
+this option is not specified, or is specified as "C<->" then the file
+will be written to standard output, otherwise if an input file is
+specified then the it will be formatted in place and the output file
+will have the same name as the input file, but with the original
+extension replaced with C<.dvi>.
+
+
+=item C<-tt2>
+
+specifies that the source document should be taken to be a Template
+Toolkit template and processed through that before being fed to the
+C<LaTeX::Driver> module for latex formatting.
+
+
+=item C<-define=I<NAME>=I<VALUE>>
+
+defines the template variable I<NAME> to have the value I<VALUE>.
+Multiple template variables may be defined and these are passed to the
+Template Toolkit processing stage (they are ignored if the C<-tt2>
+option is not specified).
+
+=back
+
+=head1 DIAGNOSTICS
+
+=head1 EXIT STATUS
+
+=head1 CONFIGURATION
+
+=head1 DEPENDENCIES
+
+=head1 INCOMPATIBILITIES
+
+=head1 BUGS AND LIMITATIONS
 
 =head1 AUTHOR
 

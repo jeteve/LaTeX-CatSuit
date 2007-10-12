@@ -2,11 +2,9 @@
 
 use strict;
 
-use lib qw( ./lib );
 use Config;
 use File::Spec::Functions qw( catfile );
 use ExtUtils::MakeMaker;
-use LaTeX::Driver;
 use Cwd;
 
 select STDERR;
@@ -16,13 +14,14 @@ select STDOUT;
 our $QUIET  = 0;
 our $ACCEPT = 0;
 our $WIN32  = ($^O eq 'MSWin32');
+our $MODVERSION = get_module_version();
 
 #------------------------------------------------------------------------
 
 message(<<EOF);
 
-LaTeX::Driver v$LaTeX::Driver::VERSION
---------------------
+LaTeX::Driver v$MODVERSION
+-------------------
 
 LaTeX::Driver runs either the 'latex' or 'pdflatex' command on a LaTeX
 document.  If unresolved cross references, bibliographic references or
@@ -181,3 +180,11 @@ sub ttprompt {
 }
 
 
+sub get_module_version {
+    open(MODULE, catfile('lib','LaTeX','Driver.pm'))
+	or die "cannot find LaTeX::Driver module\n";
+    while (<MODULE>) {
+	return $1 if /VERSION = (\d+\.\d+)/;
+    }
+    return "<unkown version>";
+}

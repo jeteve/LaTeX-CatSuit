@@ -1,16 +1,16 @@
 
                              LaTeX::Driver
 
-                             Version 0.06
+                             Version 0.07
 
-                           26 September 2007
+                            13 October 2007
 
            Copyright (C) 2007 Andrew Ford.  All Rights Reserved
 
           This is free software; you can redistribute it and/or
              modify it under the same terms as Perl itself.
 
-             $Id: INSTALL 51 2007-09-28 11:07:16Z andrew $
+             $Id: INSTALL 68 2007-10-12 22:59:52Z andrew $
 
 
 QUICK INSTALL

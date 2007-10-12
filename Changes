@@ -10,8 +10,22 @@
 #
 #
 #------------------------------------------------------------------------
-# $Id: Changes 60 2007-09-28 14:44:51Z andrew $
+# $Id: Changes 69 2007-10-12 23:00:05Z andrew $
 #========================================================================
+
+
+#------------------------------------------------------------------------
+# Version 0.07 - 2007-10-12
+#------------------------------------------------------------------------
+
+* Updated documentation - specifically the diagnostics section for
+  LaTeX::Driver and just expanded LaTeX::Driver::FilterProgram
+
+* fixed Makefile.PL, which was using LaTeX::Driver to get the module
+  version, but this broke horribly if the prerequisite modules were
+  not installed.
+
+* added missing test and test data files to MANIFEST
 
 
 #------------------------------------------------------------------------

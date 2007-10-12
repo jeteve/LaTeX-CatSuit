@@ -11,7 +11,7 @@
 #   Andrew Ford   <a.ford@ford-mason.co.uk>
 #
 #------------------------------------------------------------------------
-# $Id: TODO 4 2007-09-21 14:51:24Z andrew $
+# $Id: TODO 74 2007-10-12 23:15:13Z andrew $
 #========================================================================
 
 #------------------------------------------------------------------------
@@ -44,6 +44,8 @@
 
 * write unit tests for error conditions (invalid .bib file, etc)
 
+* test the scripts
+
 * make test scripts check for presence of tex components, such as
   dvitype, lastpage.sty
 
@@ -60,4 +62,10 @@
 
 * expand the documentation
 
-
+* try to fix the line numbers when formatting a template document with
+  latex2xxx results in latex errors.  If we get errors with line
+  numbers, they will relate to the expanded document - not to the
+  template source lines, but we could find the mapping by reexpanding
+  the template, adding line numbers in TT2 "#" comments to the
+  template source, and then go to the line number in error and read
+  off the original line number.

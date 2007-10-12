@@ -18,7 +18,7 @@
 # HISTORY
 #   * Extracted from the Template::Latex module (AF, 2007-09-10)
 #
-#   $Id: Driver.pm 64 2007-10-03 15:03:21Z andrew $
+#   $Id: Driver.pm 65 2007-10-12 22:57:20Z andrew $
 #========================================================================
 
 package LaTeX::Driver;
@@ -37,7 +37,7 @@ use File::Slurp;
 use File::Spec;			# from PathTools
 use IO::File;			# from IO
 
-our $VERSION = 0.06;
+our $VERSION = 0.07;
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format
@@ -721,7 +721,7 @@ sub _setup_tmpdir {
         } while (-e $dirname);
         eval { mkpath($dirname, 0, 0700) };
     }
-    $class->throw("failed to create temporary directory: $@") 
+    $class->throw("cannot create temporary directory: $@") 
         if $@;
 
     debug(sprintf("setting up temporary directory '%s'\n", $dirname)) if $DEBUG;
@@ -1015,6 +1015,116 @@ Runs the formatter (C<latex> or C<pdflatex>.
 
 
 =head1 DIAGNOSTICS
+
+The following errors may be detected by the constructor method.
+
+=over 4
+
+=item not available on XXX
+
+The module is not supported on MacOS, OS/2 or VMS (or on a host of
+other operating systems but these are the only ones that are
+explicitly tested for).
+
+=item no source specified
+
+The C<source> paramater should be specified as the name of a LaTeX
+source file or it should be a reference to a scalar variable holding
+the LaTeX source document.
+
+=item source is an invalid reference
+
+C<source> is a reference, but not a reference to a scalar variable
+
+=item source file XXX.tex does not exist
+
+The source file specified does not exist
+
+=item output directory DIR does not exist
+
+An C<output> parameter was specified as a scalar value, which was
+taken as the name of the output file, but the directory part of the
+path does not exist.
+
+=item invalid output format XXX
+
+An output format was specified, either explicitly or implicitly as the
+extension of the output file, but the output format specified is not
+supported.
+
+=item cannot create temporary directory
+
+The module could not create the temporary directory, which is used if
+the source is not specified as a filename, and the output is not to be
+left in the same directory as the source, or if a temporary directory
+name is specified explicitly.
+
+=item cannot create temporary latex file
+
+The module has determined that it needs to create a temporary file
+containing the source document but it cannot.
+
+=item cannot copy XXX.ext to temporary directory
+
+The module was trying to copy the specified source file to the
+temporary directory but couldn't.  Perhaps you specified the temporary
+directory name explicitly but the directory does not exist or is not
+writeable.
+
+=back
+
+The following errors may be detected when the driver's C<run()> method
+is called:
+
+=over 4
+
+=item file XXX.tex does not exist
+
+The source file does not exist; it may have been removed between the
+time the constructor was called and the time that the driver was run.
+
+=item PROGRAM exited with errors: ERRORS
+
+The named program (C<latex> or C<pdflatex>) exited with the errors listed.
+You may have errors in your source file.
+
+=item bibtex FILE failed (EXITCODE)
+
+The C<bibtex> program exited with errors.  These are not fully parsed yet.
+
+=item failed to open BASEPATH.cit
+
+The driver generates its own temporary file listing the citations for
+a document, so that it can determine whether the citations have
+changed.  This error indicates that it was unable to create the file.
+
+=item makeindex FILE failed (EXITCODE)
+
+The C<makeindex> program exited with errors.  These are not fully parsed yet.
+
+=item dvips FILE failed (EXITCODE)
+
+The C<dvips> program exited with errors.  These are not fully parsed yet.
+
+=item ps2pdf FILE failed (EXITCODE)
+
+The C<ps2pdf> program exited with errors.  These are not fully parsed yet.
+
+=item PROGNAME cannot be found, please specify its location
+
+The pathname for the specified program was not found in the modules
+configuration.  The program may not have been found and the pathname
+not been explicitly specified when the module was installed.
+
+=item failed to copy FILE to OUTPUT
+
+The driver failed to copy the formatted file to the specified output
+location.
+
+
+=back
+
+
 
 =head1 CONFIGURATION AND ENVIRONMENT
 

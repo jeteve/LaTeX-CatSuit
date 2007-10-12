@@ -1,20 +1,24 @@
 
                              LaTeX::Driver
 
-                             Version 0.06
+                             Version 0.07
 
-                           27 September 2007
+                           13 October 2007
 
            Copyright (C) 2007 Andrew Ford.  All Rights Reserved
 
           This is free software; you can redistribute it and/or
              modify it under the same terms as Perl itself.
 
-              $Id: README 61 2007-09-28 14:45:45Z andrew $
+              $Id: README 68 2007-10-12 22:59:52Z andrew $
 
 NOTE THIS IS BETA SOFTWARE - ITS INTERFACE IS LIABLE TO CHANGE.
 
+
 I welcome any and all feedback - Andrew <a.ford@ford-mason.co.uk>
+
+Please drop me an email if you use this module - I woul dbe interested
+to hear if anyone is actually using it.
 
 
 
@@ -65,7 +69,7 @@ For further details on installation, see the separate INSTALL file.
 WHAT'S NEW?
 -----------
 
-Version 0.06 is the latest in a series of incremental improvements
+Version 0.07 is the latest in a series of incremental improvements
 that aims to stabilize the interface.
 
 Version 0.01 is a new module.  It was factored out of Template-Latex,
