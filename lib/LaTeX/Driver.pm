@@ -9,6 +9,7 @@
 #   Andrew Ford <a.ford@ford-mason.co.uk>  (current maintainer)
 #
 # COPYRIGHT
+#   Copyright (C) 2009 Ford & Mason Ltd.   All Rights Reserved.
 #   Copyright (C) 2006-2007 Andrew Ford.   All Rights Reserved.
 #   Portions Copyright (C) 1996-2006 Andy Wardley.  All Rights Reserved.
 #
@@ -16,9 +17,11 @@
 #   modify it under the same terms as Perl itself.
 #
 # HISTORY
+#   * Added test for reruns required by longtable environments changing (AF, 2009-01-19)
+#
 #   * Extracted from the Template::Latex module (AF, 2007-09-10)
 #
-#   $Id: Driver.pm 65 2007-10-12 22:57:20Z andrew $
+#   $Id: Driver.pm 76 2009-01-19 13:39:01Z andrew $
 #========================================================================
 
 package LaTeX::Driver;
@@ -27,17 +30,17 @@ use strict;
 use warnings;
 
 use base 'Class::Accessor';
-use Cwd;			# from PathTools
-use English;			# standard Perl class
+use Cwd;                        # from PathTools
+use English;                    # standard Perl class
 use Exception::Class ( 'LaTeX::Driver::Exception' );
-use File::Copy;			# standard Perl class
-use File::Compare;		# standard Perl class
-use File::Path;			# standard Perl class
+use File::Copy;                 # standard Perl class
+use File::Compare;              # standard Perl class
+use File::Path;                 # standard Perl class
 use File::Slurp;
-use File::Spec;			# from PathTools
-use IO::File;			# from IO
+use File::Spec;                 # from PathTools
+use IO::File;                   # from IO
 
-our $VERSION = 0.07;
+our $VERSION = 0.08;
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format
@@ -365,6 +368,11 @@ sub run_latex {
                 $errors .= $1 . "\n";
                 $matched = 0;
             }
+            elsif ( /^Output written on (.*) \((\d+) pages, (\d+) bytes\)./ ) {
+                my ($ofile, $pages, $bytes) = ($1, $2, $3);
+                $self->{stats}{pages} = $pages;
+                $self->{stats}{bytes} = $bytes;
+            }
             elsif ( /^LaTeX Warning: Reference .*? on page \d+ undefined/ ) {
                 $self->undefined_references(1);
             }
@@ -384,6 +392,18 @@ sub run_latex {
             elsif ( /^LaTeX Warning: Label\(s\) may have changed./i ) {
                 debug('labels have changed') if $DEBUG;
                 $self->labels_changed(1);
+            }
+            elsif ( /^Package longtable Warning: Table widths have changed\. Rerun LaTeX\./i) {
+                debug('table widths changed') if $DEBUG;
+                $self->rerun_required(1);
+            }
+
+            # A number of packages emit 'rerun' warnings (revtex4,
+            # pdfmark, etc); this regexp catches most of those.
+
+            elsif ( /Rerun to get (.*) right/i) {
+                debug("$1 changed") if $DEBUG;
+                $self->rerun_required(1);
             }
         }
     }
@@ -795,7 +815,7 @@ LaTeX::Driver - Latex driver
 
 =head1 VERSION
 
-This document describes version 0.06 of C<LaTeX::Driver>.
+This document describes version 0.08 of C<LaTeX::Driver>.
 
 =head1 SYNOPSIS
 
@@ -955,11 +975,22 @@ tht was performed, containing the following items:
 
 =over 4
 
+=item C<pages>
+
+number of pages in the formatted document
+
+=item C<bytes>
+
+number of bytes in the formatted document
+
 =item C<runs>
 
 hash of the number of times each of the programs was run
 
 =back
+
+Note: the return value will probably become an object in a future
+version of the module.
 
 
 =item C<cleanup($what)>
@@ -986,30 +1017,61 @@ driver.  Calling these methods directly may lead to unpredictable results.
 
 =item C<run_latex>
 
-Runs the formatter (C<latex> or C<pdflatex>.
+Runs the formatter (C<latex> or C<pdflatex>).
 
 =item C<need_to_run_latex>
 
+Determines whether the formatter needs to be run.
+
 =item C<reset_latex_required>
+
+Reset the flags that indicate whether latex needs to be re-run
+(invoked prior to each iteration of running any necessary commands).
 
 =item C<run_bibtex>
 
+Runs bibtex to generate the bibliography.
+
 =item C<need_to_run_bibtex>
+
+Determines whether bibtex needs to be run.
 
 =item C<run_makeindex>
 
+Runs makeindex to generate the index.
+
 =item C<need_to_run_makeindex>
+
+Determines whether makeindex needs to be run.
 
 =item C<run_dvips>
 
+Runs dvips to generate postscript output from an intermediate C<.dvi> file.
+
 =item C<run_ps2pdf>
+
+Runs ps2pdf to generate PDF output from an intermediate PostScript file.
+
+=item C<run_pdf2ps>
+
+Runs pdf2ps to generate PostScript output from an intermediate PDF file.
 
 =item C<run_command>
 
+Run a command in a controlled environment, allowing for operating system differences.
+
+=item C<copy_to_output>
+
+Copy the output to its final destination.
+
 =item C<throw>
+
+Throw an exception.
 
 =item C<debug>
 
+Print a debug message - the caller should test C<$DEBUG> to determine
+whether to invoke this function.
 
 =back
 
@@ -1278,6 +1340,8 @@ Andrew Ford E<lt>a.ford@ford-mason.co.ukE<gt>
 
 
 =head1 LICENSE AND COPYRIGHT
+
+Copyright (C) 2009 Ford & Mason Ltd.  All Rights Reserved.
 
 Copyright (C) 2007 Andrew Ford.  All Rights Reserved.
 

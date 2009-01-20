@@ -8,4 +8,4 @@ top       = 50
 theme     = (pbp || security) && bugs
 include   = NamingConventions ClassHierarchies
 exclude   = Variables  Modules::RequirePackage
-color     = 0
+#color     = 0

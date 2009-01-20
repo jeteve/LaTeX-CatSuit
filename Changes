@@ -10,9 +10,23 @@
 #
 #
 #------------------------------------------------------------------------
-# $Id: Changes 69 2007-10-12 23:00:05Z andrew $
+# $Id: Changes 80 2009-01-19 13:42:25Z andrew $
 #========================================================================
 
+
+#------------------------------------------------------------------------
+# Version 0.08 - 2009-01-19
+#------------------------------------------------------------------------
+
+* Added two elements to the stats hash - 'pages' and 'bytes'
+
+* Added check for rerun required by use of the longtable package
+  (patch submitted by Yitzchack Scott-Thoennes - cpan id: YSTM), also
+  added test script
+
+* also check for generic /rerun to get .* right/ warning
+
+* expand documentation for Pod::Coverage
 
 #------------------------------------------------------------------------
 # Version 0.07 - 2007-10-12

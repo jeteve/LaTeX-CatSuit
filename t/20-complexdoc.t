@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# $Id: 20-complexdoc.t 62 2007-10-03 14:20:44Z andrew $
+# $Id: 20-complexdoc.t 79 2009-01-19 13:42:09Z andrew $
 
 use strict;
 use blib;
@@ -8,7 +8,7 @@ use File::Spec;
 use lib ("$Bin/../lib", "$Bin/lib");
 use Data::Dumper;
 
-use Test::More tests => 11;
+use Test::More tests => 12;
 
 use Test::LaTeX::Driver;
 use LaTeX::Driver;
@@ -30,6 +30,7 @@ is($drv->formatter, 'latex', "formatter");
 
 ok($drv->run, "formatting $docname");
 
+is($drv->stats->{pages}, 12, "should have 12 pages of output");
 cmp_ok($drv->stats->{runs}{latex}, '>=',  5, "should have run latex at least five times");
 cmp_ok($drv->stats->{runs}{latex}, '<=',  8, "should have run latex not more than eight times");
 is($drv->stats->{runs}{bibtex},    1, "should have run bibtex once");

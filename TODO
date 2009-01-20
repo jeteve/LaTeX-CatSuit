@@ -11,14 +11,14 @@
 #   Andrew Ford   <a.ford@ford-mason.co.uk>
 #
 #------------------------------------------------------------------------
-# $Id: TODO 74 2007-10-12 23:15:13Z andrew $
+# $Id: TODO 80 2009-01-19 13:42:25Z andrew $
 #========================================================================
 
 #------------------------------------------------------------------------
 # Miscellaneous
 #------------------------------------------------------------------------
 
-* improve Kwalitee and general adherance to Perl best practice
+* improve Kwalitee and general adherance to Perl best practice [MOSTLY DONE]
 
 * add a script to invoke LaTeX::Driver on a specified file - need to
   think of a good name and a sensible set of options
@@ -69,3 +69,6 @@
   the template, adding line numbers in TT2 "#" comments to the
   template source, and then go to the line number in error and read
   off the original line number.
+
+* check for further conditions that require re-running of one or more
+  LaTeX programs.

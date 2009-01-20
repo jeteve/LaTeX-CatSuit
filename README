@@ -1,16 +1,17 @@
 
                              LaTeX::Driver
 
-                             Version 0.07
+                             Version 0.08
 
-                           13 October 2007
+                            19 January 2009
 
+        Copyright (C) 2009 Ford & Mason Ltd.  All Rights Reserved
            Copyright (C) 2007 Andrew Ford.  All Rights Reserved
 
           This is free software; you can redistribute it and/or
              modify it under the same terms as Perl itself.
 
-              $Id: README 68 2007-10-12 22:59:52Z andrew $
+              $Id: README 80 2009-01-19 13:42:25Z andrew $
 
 NOTE THIS IS BETA SOFTWARE - ITS INTERFACE IS LIABLE TO CHANGE.
 
@@ -68,6 +69,11 @@ For further details on installation, see the separate INSTALL file.
 
 WHAT'S NEW?
 -----------
+
+Version 0.08 adds checks for documents that use the 'longtable'
+package and other packages that can require latex reruns without
+necessarily changing labels.  It also exposes the page count (and the
+byte count) in the statistics hash.
 
 Version 0.07 is the latest in a series of incremental improvements
 that aims to stabilize the interface.
