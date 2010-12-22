@@ -39,6 +39,7 @@ use File::Path;                 # standard Perl class
 use File::Slurp;
 use File::Spec;                 # from PathTools
 use IO::File;                   # from IO
+use Carp;                       # for confess
 
 our $VERSION = 0.08;
 
@@ -677,9 +678,18 @@ sub run_command {
     }
 
     $self->stats->{runs}{$progname}++;
-    debug("running '$program $args'") if $DEBUG;
+    debug("running '$cmd'") if $DEBUG;
 
     my $exitstatus = system($cmd);
+    if( $exitstatus != 0 ){
+      if( $exitstatus == -1 ){
+        $self->throw("Failed to execute $cmd: ".$!);
+      } elsif( $exitstatus & 127 ){
+        $self->throw("System dies with signal ".( $exitstatus & 127 ).": $!");
+      }else{
+        $self->throw("General command failure executing :\n$cmd\n:\n$!\n(returned code ".($exitstatus >> 8).")\n");
+      }
+    }
     return $exitstatus;
 }
 

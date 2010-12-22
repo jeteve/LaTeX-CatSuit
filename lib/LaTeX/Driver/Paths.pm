@@ -35,7 +35,7 @@ $program_path{pdflatex}  = '/usr/bin/pdflatex';
 $program_path{bibtex}    = '/usr/bin/bibtex';
 $program_path{makeindex} = '/usr/bin/makeindex';
 $program_path{dvips}     = '/usr/bin/dvips';
-$program_path{dvipdfm}   = '';
+$program_path{dvipdfm}   = '/usr/bin/dvipdfm';
 $program_path{pdf2ps}    = '/usr/bin/pdf2ps';
 $program_path{ps2pdf}    = '/usr/bin/pdf2ps';
 
