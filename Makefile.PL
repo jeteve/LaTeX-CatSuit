@@ -70,12 +70,15 @@ my %opts = (
     'EXE_FILES'    => [ 'scripts/latex2dvi', 'scripts/latex2pdf', 'scripts/latex2ps' ],
     'PMLIBDIRS'    => [ 'lib' ], 
     'PREREQ_PM'    => { 
+	'BSD::Resource'    => 0,
 	'Class::Accessor'  => 0,
 	'Cwd'              => 0,
 	'Exception::Class' => 0,
 	'File::Slurp'      => 0,
 	'File::Spec'       => 0,
 	'IO::File'         => 0,
+	'Test::More'       => 0,
+	'Test::Exception'  => 0,
     },
     'dist'         => {
         'COMPRESS' => 'gzip',

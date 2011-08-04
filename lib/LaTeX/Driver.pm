@@ -7,8 +7,10 @@
 #
 # AUTHOR
 #   Andrew Ford <a.ford@ford-mason.co.uk>  (current maintainer)
+#   Jerome Eteve <jerome.eteve@gmail.com>  (minor features)
 #
 # COPYRIGHT
+#   Copyright (C) 2011 Jerome Eteve.
 #   Copyright (C) 2009 Ford & Mason Ltd.   All Rights Reserved.
 #   Copyright (C) 2006-2007 Andrew Ford.   All Rights Reserved.
 #   Portions Copyright (C) 1996-2006 Andy Wardley.  All Rights Reserved.
@@ -33,6 +35,7 @@ use base 'Class::Accessor';
 use Cwd;                        # from PathTools
 use English;                    # standard Perl class
 use Exception::Class ( 'LaTeX::Driver::Exception' );
+use BSD::Resource;              # for timeout implementation
 use File::Copy;                 # standard Perl class
 use File::Compare;              # standard Perl class
 use File::Path;                 # standard Perl class
@@ -41,14 +44,14 @@ use File::Spec;                 # from PathTools
 use IO::File;                   # from IO
 use Carp;                       # for confess
 
-our $VERSION = 0.08;
+our $VERSION = 0.09;
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format
                                formatter preprocessors postprocessors _program_path
                                maxruns extraruns stats texinputs_path
                                undefined_citations undefined_references
-                               labels_changed rerun_required ) );
+                               labels_changed rerun_required timeout) );
 
 our $DEBUG; $DEBUG = 0 unless defined $DEBUG;
 our $DEBUGPREFIX;
@@ -218,6 +221,8 @@ sub new {
     $texinputs_path = [ split(/:/, $texinputs_path) ] unless ref $texinputs_path;
 
 
+    my $timeout = $options->{timeout};
+
     # construct and return the object
 
     return $class->SUPER::new( { basename       => $basename,
@@ -231,6 +236,7 @@ sub new {
                                  extraruns      => $options->{extraruns} ||  0,
                                  formatter      => $formatter,
                                  _program_path  => $path,
+                                 timeout        => $timeout,
                                  texinputs_path => join(':', ('.', @$texinputs_path, '')),
                                  preprocessors  => [],
                                  postprocessors => \@postprocessors,
@@ -689,6 +695,14 @@ sub run_command {
         die "This should never be reached";
     }
     if( $pid == 0 ){
+        if( defined $self->timeout() ){
+            ## Set up some timeout with BSD::Resource
+            my $cpu_seconds = $self->timeout();
+            unless( setrlimit(RLIMIT_CPU, $cpu_seconds, $cpu_seconds) ){
+                die "Cannot set CPU Seconds limit on child process";
+            }
+        }
+
         ## Lets execute
         exec($cmd); ## This never returns.
     }
@@ -942,6 +956,11 @@ values are C<none> (do no cleanup), C<logfiles> (remove log files) and
 C<tempfiles> (remove log and temporary files).  By default the
 destructor will remove the entire contents of any automatically
 generated temporary directory, but will leave all other files intact.
+
+=item C<timeout>
+
+Specifies a timeout in second under which any underlying LaTeX command should finish.
+The run method will die in case it takes too long.
 
 =item C<indexstyle>
 

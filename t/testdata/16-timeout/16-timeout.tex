@@ -1,0 +1,30 @@
+% Test input file for checking of simple formatting.
+% Do not make gratuitous changes here as the text is checked by the
+% test script 16-timeout.t.
+
+\documentclass{article}
+\date{04 August 2011}
+\author{Jerome Eteve}
+\title{Simple Test Document 16}
+\usepackage{forloop}
+\begin{document}
+\maketitle
+
+This is a test document with a long running loop that should end with a timeout
+using the new timeout feature.
+
+Those figures (10 10 500) dont exceed latex's capacity (In ubuntu, TeX Live 2009/debian)
+but allow a timeout of 1 second to be enforced (on Intel Core i5 \@ 2.3 GHz)
+
+\newcounter{levelone}
+\newcounter{leveltwo}
+\newcounter{levelthree}
+\forloop{levelone}{1}{\value{levelone} < 10}{
+    \forloop{leveltwo}{1}{\value{leveltwo} < 10}{
+        \forloop{levelthree}{1}{\value{levelthree} < 250}{
+                \arabic{levelone} \arabic{leveltwo} \arabic{levelthree}
+        }
+    }
+}
+
+\end{document}

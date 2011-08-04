@@ -13,6 +13,15 @@
 # $Id: Changes 80 2009-01-19 13:42:25Z andrew $
 #========================================================================
 
+#------------------------------------------------------------------------
+# Version 0.09_01 - 2011-08-04
+#------------------------------------------------------------------------
+
+* New timeout feature to allocate a maximum runtime
+  to the underlying LaTeX commands.
+
+* Better diagnostic message when something goes wrong in an LaTeX
+  command call.
 
 #------------------------------------------------------------------------
 # Version 0.08 - 2009-01-19
