@@ -1,10 +1,11 @@
 
                              LaTeX::Driver
 
-                             Version 0.08
+                             Version 0.09
 
-                            19 January 2009
+                            04 August 2011
 
+          Copyright (C) 2011 Jerome Eteve. All rights Reserved
         Copyright (C) 2009 Ford & Mason Ltd.  All Rights Reserved
            Copyright (C) 2007 Andrew Ford.  All Rights Reserved
 
@@ -16,9 +17,9 @@
 NOTE THIS IS BETA SOFTWARE - ITS INTERFACE IS LIABLE TO CHANGE.
 
 
-I welcome any and all feedback - Andrew <a.ford@ford-mason.co.uk>
+I welcome any and all feedback - Andrew <a.ford@ford-mason.co.uk> / jerome.eteve@gmail.com
 
-Please drop me an email if you use this module - I woul dbe interested
+Please drop me an email if you use this module - I would be interested
 to hear if anyone is actually using it.
 
 
@@ -69,6 +70,10 @@ For further details on installation, see the separate INSTALL file.
 
 WHAT'S NEW?
 -----------
+
+Version 0.09 adds better diagnostic of LaTeX commands error
+if they fail even before any log output. It also adds a timeout
+option to avoid long runs.
 
 Version 0.08 adds checks for documents that use the 'longtable'
 package and other packages that can require latex reruns without
@@ -164,6 +169,7 @@ Template-Latex.
 COPYRIGHT
 ---------
 
+Copyright (C) 2011 Jerome Eteve. All Rights Reserved.
 Copyright (C) 2007 Andrew Ford.   All Rights Reserved.
 Portions Copyright (C) 1996-2007 Andy Wardley.  All Rights Reserved.
 
