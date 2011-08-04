@@ -678,9 +678,25 @@ sub run_command {
     }
 
     $self->stats->{runs}{$progname}++;
-    debug("running '$cmd'") if $DEBUG;
+    debug("will run '$cmd'") if $DEBUG;
+    
+    ## Replace system by a fork/exec
+    #my $exitstatus = system($cmd);
 
-    my $exitstatus = system($cmd);
+    my $pid = fork();
+    unless( defined $pid ){
+        $self->throw("Forked failed. Not enough resource?");
+        die "This should never be reached";
+    }
+    if( $pid == 0 ){
+        ## Lets execute
+        exec($cmd); ## This never returns.
+    }
+
+    ## Still in the parent. Waiting for the child. Blocking call.
+    waitpid($pid, 0);
+    my $exitstatus = $?;
+
     if( $exitstatus != 0 ){
       if( $exitstatus == -1 ){
         $self->throw("Failed to execute $cmd: ".$!);
