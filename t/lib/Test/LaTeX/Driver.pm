@@ -132,6 +132,7 @@ sub find_program {
 #   .dvi
 #   .ps
 #   .pdf
+#   STDERR The STDERR captured file.
 #------------------------------------------------------------------------
 
 sub tidy_directory {
@@ -149,16 +150,23 @@ sub tidy_directory {
                         ind idx ilg ibk
                         bbl blg cit cbk
                         dvi ps pdf)) {
-	my $file = File::Spec->catfile($dir, "${docname}.$ext");
-	if (-e $file) {
-	    diag("removing file '$file'") if $debug > 1;
-	    my $rc = unlink($file);
-	    diag("unlink returned $rc") if $debug > 2;	    
-	    diag("couldn't remove file '$file'") if $debug > 1 and -e $file;
-	}
-	else {
-	    diag("file '$file' does not exist") if $debug > 3;	    
-	}
+      my $file = File::Spec->catfile($dir, "${docname}.$ext");
+      if (-e $file) {
+        diag("removing file '$file'") if $debug > 1;
+        my $rc = unlink($file);
+        diag("unlink returned $rc") if $debug > 2;
+        diag("couldn't remove file '$file'") if $debug > 1 and -e $file;
+      }
+      else {
+        diag("file '$file' does not exist") if $debug > 3;
+      }
+    }
+    my $file = File::Spec->catfile($dir, 'STDERR');
+    if( -e $file ){
+      diag("removing file $file") if $debug > 1;
+      unlink($file) || die "Cannot unlink '$file'";
+    }else{
+      diag("file '$file' does not exist") if $debug > 3;
     }
 }
 

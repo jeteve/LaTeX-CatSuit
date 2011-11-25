@@ -18,6 +18,7 @@ t/13-tableofcontents.t
 t/14-makeindex.t
 t/15-bibtex.t
 t/16-timeout.t
+t/17-stderr.t
 t/20-complexdoc.t
 t/30-output-to-variable.t
 t/31-input-from-variable.t
@@ -40,6 +41,8 @@ t/testdata/14-makeindex/testind.ist
 t/testdata/15-bibtex/15-bibtex.tex
 t/testdata/15-bibtex/testbib.bib
 t/testdata/16-timeout/16-timeout.tex
+t/testdata/17-stderr/17-stderr.tex
+t/testdata/17-stderr/dummy.pdf
 t/testdata/20-complexdoc/20-complexdoc.tex
 t/testdata/20-complexdoc/testbib.bib
 t/testdata/20-complexdoc/testinc.tex

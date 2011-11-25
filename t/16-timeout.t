@@ -16,9 +16,9 @@ use LaTeX::Driver;
 tidy_directory($basedir, $docname, $debug);
 
 my $drv = LaTeX::Driver->new( source => $docpath,
-			      format => 'dvi',
+                              format => 'dvi',
                               timeout => 1,
-			      @DEBUGOPTS );
+                              @DEBUGOPTS );
 
 diag("Checking the timeout feature");
 isa_ok($drv, 'LaTeX::Driver');
@@ -37,16 +37,16 @@ tidy_directory($basedir, $docname, $debug);
 ## the timeout implementation doesnt break the current process.
 {
     my $drv = LaTeX::Driver->new( source => $docpath,
-				  format => 'dvi',
-				  #timeout => 1,
-				  @DEBUGOPTS );
+                                  format => 'dvi',
+                                  #timeout => 1,
+                                  @DEBUGOPTS );
     diag("Runing without timeout. Should take a while");
     lives_ok( sub{ $drv->run() ; } , "Now runs until the end without crashing with no timeout");
     diag("Took a while");
     test_dvifile($drv, [ "Simple Test Document $testno",	# title
-			 'Jerome Eteve',			# author
-			 '04 August 2011',		# date
-			 'allow a timeout of 1 second' ] );
+                         'Jerome Eteve',			# author
+                         '04 August 2011',		# date
+                         'allow a timeout of 1 second' ] );
     tidy_directory($basedir, $docname, $debug);
 }
 
