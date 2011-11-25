@@ -1,0 +1,22 @@
+\documentclass[11pt,letterpaper,notitlepage,twoside,openright]{report}
+
+%%% Pdfpages %%%
+\usepackage{pdfpages}
+
+
+\begin{document}
+
+Before document
+
+\includepdf[pages={-},nup=1x1,frame=true]{dummy.pdf}
+
+%\includepdf[pages={-},frame=true]{.pdf}
+%\includepdf[pages={-},frame=true]{.pdf}
+%\includepdf[pages={-},frame=true]{.pdf}
+%\includepdf[pages={-},frame=true]{.pdf}
+
+After document.
+
+\chapter{This is second stuff}
+
+\end{document}

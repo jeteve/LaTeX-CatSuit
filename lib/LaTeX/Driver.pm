@@ -44,14 +44,14 @@ use File::Spec;                 # from PathTools
 use IO::File;                   # from IO
 use Carp;                       # for confess
 
-our $VERSION = 0.09;
+our $VERSION = 0.11;
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format
                                formatter preprocessors postprocessors _program_path
                                maxruns extraruns stats texinputs_path
                                undefined_citations undefined_references
-                               labels_changed rerun_required timeout) );
+                               labels_changed rerun_required timeout capture_stderr) );
 
 our $DEBUG; $DEBUG = 0 unless defined $DEBUG;
 our $DEBUGPREFIX;
@@ -222,6 +222,7 @@ sub new {
 
 
     my $timeout = $options->{timeout};
+    my $capture_stderr = $options->{capture_stderr} // 0;
 
     # construct and return the object
 
@@ -237,11 +238,12 @@ sub new {
                                  formatter      => $formatter,
                                  _program_path  => $path,
                                  timeout        => $timeout,
+                                 capture_stderr => $capture_stderr,
                                  texinputs_path => join(':', ('.', @$texinputs_path, '')),
                                  preprocessors  => [],
                                  postprocessors => \@postprocessors,
                                  stats          => { runs => {} } } );
-    
+
 }
 
 
@@ -680,14 +682,15 @@ sub run_command {
     }
     else {
         $args = "'$args'" if $args =~ / \\ /mx;
-        $cmd  = "cd $dir; $program $args 1>$null 2>$null 0<$null";
+        my $stderr = $null;
+        if( $self->capture_stderr() ){ $stderr = $self->std_error_file(); }
+        $cmd  = "cd $dir; $program $args 1>$null 2>".$stderr." 0<$null";
     }
 
     $self->stats->{runs}{$progname}++;
     debug("will run '$cmd'") if $DEBUG;
-    
+
     ## Replace system by a fork/exec
-    #my $exitstatus = system($cmd);
 
     my $pid = fork();
     unless( defined $pid ){
@@ -715,7 +718,7 @@ sub run_command {
       if( $exitstatus == -1 ){
         $self->throw("Failed to execute $cmd: ".$!);
       } elsif( $exitstatus & 127 ){
-        $self->throw("System dies with signal ".( $exitstatus & 127 ).": $!");
+        $self->throw("Command failure $cmd: died with signal ".( $exitstatus & 127 ).": $!");
       }else{
         $self->throw("General command failure executing :\n$cmd\n:\n$!\n(returned code ".($exitstatus >> 8).")\n");
       }
@@ -723,6 +726,22 @@ sub run_command {
     return $exitstatus;
 }
 
+
+=head2 std_error_file
+
+Returns the std_error_file used by this run. Note that this is UNIX only and will
+only exists in case you've set the option capture_stderr to 1.
+
+Usage:
+
+  my $error_file = $this->std_error_file();
+
+=cut
+
+sub std_error_file{
+  my ($self) = @_;
+  return File::Spec->catfile($self->basedir(), 'STDERR');
+}
 
 #------------------------------------------------------------------------
 # $self->copy_to_output
@@ -977,7 +996,11 @@ for full details.
 
 =item C<texinputs>
 
-Specifies one or more directories to be searched for LaTeX files.  
+Specifies one or more directories to be searched for LaTeX files.
+
+=item C<capture_stderr>
+
+Capture the STDERR of your run into a file so you can examine it later.
 
 =item C<DEBUG>
 

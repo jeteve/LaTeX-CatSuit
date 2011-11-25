@@ -1,9 +1,9 @@
 
                              LaTeX::Driver
 
-                             Version 0.09
+                             Version 0.11
 
-                            04 August 2011
+                            25 November 2011
 
           Copyright (C) 2011 Jerome Eteve. All rights Reserved
         Copyright (C) 2009 Ford & Mason Ltd.  All Rights Reserved
@@ -70,6 +70,9 @@ For further details on installation, see the separate INSTALL file.
 
 WHAT'S NEW?
 -----------
+
+Version 0.11 adds the capture_stderr option, allowing you
+to examine the STDERR of your LaTeX run.
 
 Version 0.09 adds better diagnostic of LaTeX commands error
 if they fail even before any log output. It also adds a timeout
