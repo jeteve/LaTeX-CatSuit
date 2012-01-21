@@ -18,7 +18,7 @@
 #
 #========================================================================
 
-package LaTeX::Driver::FilterProgram;
+package LaTeX::CatSuit::FilterProgram;
 
 use strict;
 use warnings;

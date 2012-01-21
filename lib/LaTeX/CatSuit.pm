@@ -43,7 +43,7 @@ use File::Spec;                 # from PathTools
 use IO::File;                   # from IO
 use Carp;                       # for confess
 
-our $VERSION = '1.00_01';
+our $VERSION = '1.00_02';
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format
@@ -726,16 +726,6 @@ sub run_command {
 }
 
 
-=head2 std_error_file
-
-Returns the std_error_file used by this run. Note that this is UNIX only and will
-only exists in case you've set the option capture_stderr to 1.
-
-Usage:
-
-  my $error_file = $this->std_error_file();
-
-=cut
 
 sub std_error_file{
   my ($self) = @_;
@@ -1146,6 +1136,24 @@ Throw an exception.
 Print a debug message - the caller should test C<$DEBUG> to determine
 whether to invoke this function.
 
+=item C<std_error_file>
+
+Returns the std_error_file used by this run. Note that this is UNIX only and will
+only exists in case you've set the option capture_stderr to 1.
+
+Note that this std_error_file will disapear on cleanup, so if you want to use it,
+set the options 'capture_stderr' to true, and the 'cleanup' option to false.
+
+Dont forget to cleanup manually when you're done.
+
+Usage:
+
+  ...
+  $this->run();
+  my $error_file = $this->std_error_file();
+  ...
+  $this->cleanup();
+
 =back
 
 
@@ -1410,6 +1418,10 @@ the web2c TeX distribution, TeX live, tetex, TeX on Windows, etc.
 
 
 =head1 AUTHOR
+
+Jerome Eteve L<jeteve@cpan.org>
+
+=head1 ORIGINAL AUTHOR
 
 Andrew Ford E<lt>a.ford@ford-mason.co.ukE<gt>
 
