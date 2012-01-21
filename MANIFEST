@@ -32,6 +32,7 @@ t/perlcriticrc
 t/testdata/00-common/testinc2.tex
 t/testdata/01-errors/01-errors.tex
 t/testdata/02-brokendocs/02-brokendocs.tex
+t/testdata/03-brokencommand/03-brokencommand.tex
 t/testdata/10-simpledoc/10-simpledoc.tex
 t/testdata/11-references/11-references.tex
 t/testdata/12-includes/12-includes.tex
