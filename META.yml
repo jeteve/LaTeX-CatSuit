@@ -27,4 +27,4 @@ requires:
   IO::File: 0
   Test::Exception: 0
   Test::More: 0
-version: 1
+version: 1.00_01

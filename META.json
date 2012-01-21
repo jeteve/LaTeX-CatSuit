@@ -1,0 +1,49 @@
+{
+   "abstract" : "LaTeX CatSuit",
+   "author" : [
+      "Jerome Eteve <jeteve@cpan.org>"
+   ],
+   "dynamic_config" : 1,
+   "generated_by" : "ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112150",
+   "license" : [
+      "unknown"
+   ],
+   "meta-spec" : {
+      "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+      "version" : "2"
+   },
+   "name" : "LaTeX-CatSuit",
+   "no_index" : {
+      "directory" : [
+         "t",
+         "inc"
+      ]
+   },
+   "prereqs" : {
+      "build" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : 0
+         }
+      },
+      "configure" : {
+         "requires" : {
+            "ExtUtils::MakeMaker" : 0
+         }
+      },
+      "runtime" : {
+         "requires" : {
+            "BSD::Resource" : 0,
+            "Class::Accessor" : 0,
+            "Cwd" : 0,
+            "Exception::Class" : 0,
+            "File::Slurp" : 0,
+            "File::Spec" : 0,
+            "IO::File" : 0,
+            "Test::Exception" : 0,
+            "Test::More" : 0
+         }
+      }
+   },
+   "release_status" : "testing",
+   "version" : "1.00_01"
+}

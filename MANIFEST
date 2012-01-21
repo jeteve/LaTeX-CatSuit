@@ -50,3 +50,4 @@ t/testdata/20-complexdoc/testinc.tex
 t/testdata/30-output-to-variable/30-output-to-variable.tex
 t/testdata/31-input-from-variable/31-input-from-variable.tex
 META.yml                                 Module meta-data (added by MakeMaker)
+META.json

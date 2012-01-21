@@ -43,7 +43,7 @@ use File::Spec;                 # from PathTools
 use IO::File;                   # from IO
 use Carp;                       # for confess
 
-our $VERSION = 1.00;
+our $VERSION = '1.00_01';
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format

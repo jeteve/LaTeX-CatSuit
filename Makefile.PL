@@ -14,7 +14,7 @@ select STDOUT;
 our $QUIET  = 0;
 our $ACCEPT = 0;
 our $WIN32  = ($^O eq 'MSWin32');
-our $MODVERSION = get_module_version();
+our $MODVERSION = '1.00_01';
 
 #------------------------------------------------------------------------
 
@@ -90,7 +90,8 @@ my $EM_VERSION = $ExtUtils::MakeMaker::VERSION;
 $EM_VERSION =~ s/_.+//;
 if ($EM_VERSION >= '5.43') {
     $opts{ AUTHOR   } = 'Jerome Eteve <jeteve@cpan.org>';
-    $opts{ ABSTRACT } = 'LaTeX CatSuit',
+    $opts{ ABSTRACT } = 'LaTeX CatSuit';
+    $opts{ LICENCE } = 'perl';
 }
 
 WriteMakefile(%opts);
@@ -185,11 +186,11 @@ sub ttprompt {
 }
 
 
-sub get_module_version {
-    open(MODULE, catfile('lib','LaTeX','CatSuit.pm'))
-	or die "cannot find LaTeX::CatSuit module\n";
-    while (<MODULE>) {
-	return $1 if /VERSION = (\d+\.\d+)/;
-    }
-    return "<unkown version>";
-}
+# sub get_module_version {
+#     open(MODULE, catfile('lib','LaTeX','CatSuit.pm'))
+# 	or die "cannot find LaTeX::CatSuit module\n";
+#     while (<MODULE>) {
+# 	return $1 if /VERSION = (\d+\.\d+)/;
+#     }
+#     return "<unkown version>";
+# }
