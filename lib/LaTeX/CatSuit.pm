@@ -902,6 +902,12 @@ result of the processing up to a dozen or more intermediate files are
 created.  These can be removed with the C<cleanup> method.
 
 
+=head1 SOURCE
+
+Source code can be found at L<https://github.com/jeteve/LaTeX-CatSuit>
+
+Feel free to fork and add your stuff!
+
 =head1 SUBROUTINES/METHODS
 
 =over 4
@@ -1300,7 +1306,7 @@ Investigate pre- and post-processors and other auxilliary programs.
 
 =head1 BACKGROUND
 
-This is a fork of the original LaTeX::Driver module.
+This is a fork of the original LaTeX::Driver module by Andrew Mason.
 
 This module has its origins in the original C<latex> filter that was
 part of Template Toolkit prior to version 2.16.  That code was fairly
@@ -1409,6 +1415,8 @@ Andrew Ford E<lt>a.ford@ford-mason.co.ukE<gt>
 
 
 =head1 LICENSE AND COPYRIGHT
+
+Copyright (C) 2012 Jerome Eteve. All Rights Reserved.
 
 Copyright (C) 2009 Ford & Mason Ltd.  All Rights Reserved.
 
