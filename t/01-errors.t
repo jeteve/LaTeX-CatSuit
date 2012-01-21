@@ -1,5 +1,5 @@
 #!/usr/bin/perl
-# Script to test LaTeX::Driver's error handling
+# Script to test LaTeX::CatSuit's error handling
 # $Id: 01-errors.t 50 2007-09-28 10:51:47Z andrew $
 
 use strict;
@@ -18,8 +18,8 @@ BEGIN {
     plan skip_all => "Test::Exception needed" if $@;
 }
 
-use Test::LaTeX::Driver;
-use LaTeX::Driver;
+use Test::LaTeX::CatSuit;
+use LaTeX::CatSuit;
 
 plan tests => 4;
 
@@ -33,11 +33,11 @@ die "hey, someone created our non-existent directory" if -d $nonexistent_dir;
 
 diag("testing constructor error handling");
 
-dies_ok { LaTeX::Driver->new( DEBUG       => $debug,
+dies_ok { LaTeX::CatSuit->new( DEBUG       => $debug,
 			      DEBUGPREFIX => $debugprefix ) } 'no source specified';
 like($@, qr{no source specified}, 'constructor fails without a source');
 
-dies_ok { LaTeX::Driver->new( source      => $docpath,
+dies_ok { LaTeX::CatSuit->new( source      => $docpath,
 			      format      => 'tiff',
 			      DEBUG       => $debug,
 			      DEBUGPREFIX => $debugprefix ) } 'unsupported output type';

@@ -1,27 +1,29 @@
 #============================================================= -*-perl-*-
 #
-# LaTeX::Driver::Paths
+# LaTeX::CatSuit::Paths
 #
 # DESCRIPTION
 #   Provides an interface to Latex from the Template Toolkit.
 #
-# AUTHOR
+# ORIGINAL AUTHOR
 #   Andrew Ford    <a.ford@ford-mason.co.uk>
 #
 # COPYRIGHT
+#   Copyright (C) 2012 Jerome Eteve. All rights Reserved.
 #   Copyright (C) 2007 Andrew Ford.  All Rights Reserved.
 #
 #   This module is free software; you can redistribute it and/or
 #   modify it under the same terms as Perl itself.
 #
 # HISTORY
+#
+#   * Forked by Jerome Eteve from Adrew Ford's LaTeX::Driver, January 2012
 #   * Module extracted from Template::Latex module originally by Andy Wardley,
 #     September 2007
 #
-#   $Id: Paths.pm 45 2007-09-28 10:33:19Z andrew $
 #========================================================================
- 
-package LaTeX::Driver::Paths;
+
+package LaTeX::CatSuit::Paths;
 
 use strict;
 use warnings;
@@ -45,11 +47,11 @@ __END__
 
 =head1 NAME
 
-LaTeX::Driver::Paths
+LaTeX::CatSuit::Paths
 
 =head1 SYNOPSIS
 
-N/A - this file is only intended to be used from C<LaTeX::Driver>
+N/A - this file is only intended to be used from C<LaTeX::CatSuit>
 
 =head1 DESCRIPTION
 
@@ -58,10 +60,12 @@ is updated by Makefile.PL.
 
 =head1 AUTHOR
 
+Jerome Eteve E<lt>jeteve@cpan.orgE<gt>
 Andrew Ford E<lt>a.ford@ford-mason.co.ukE<gt>
 
 =head1 LICENSE AND COPYRIGHT
 
+Copyright (C) 2012 Jerome Eteve. All rights Reserved.
 Copyright (C) 2007 Andrew Ford.  All Rights Reserved.
 
 This module is free software; you can redistribute it and/or

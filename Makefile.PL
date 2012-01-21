@@ -20,10 +20,10 @@ our $MODVERSION = get_module_version();
 
 message(<<EOF);
 
-LaTeX::Driver v$MODVERSION
+LaTeX::CatSuit v$MODVERSION
 -------------------
 
-LaTeX::Driver runs either the 'latex' or 'pdflatex' command on a LaTeX
+LaTeX::CatSuit runs either the 'latex' or 'pdflatex' command on a LaTeX
 document.  If unresolved cross references, bibliographic references or
 index definitions are found then 'bibtex' or 'makeindex' will be run
 as appropriate and 'latex' or 'pdflatex' re-run as necessary.  The
@@ -53,21 +53,20 @@ if (!$LATEX and !$PDFLATEX) {
     die("Aborting as LaTeX is not installed\n") unless uc($continue) =~ /^Y/;
 }
 
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'latex',     $LATEX);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'pdflatex',  $PDFLATEX);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'bibtex',    $BIBTEX);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'makeindex', $MAKEINDEX);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'dvips',     $DVIPS);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'dvipdfm',   $DVIPDFM);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'ps2pdf',    $PS2PDF);
-fix_path_assignment(catfile('lib','LaTeX','Driver','Paths.pm'), 'ps2pdf',    $PDF2PS);
+fix_path_assignment(catfile('lib','LaTeX','CatSuit','Paths.pm'), 'latex',     $LATEX);
+fix_path_assignment(catfile('lib','LaTeX','CatSuit','Paths.pm'), 'pdflatex',  $PDFLATEX);
+fix_path_assignment(catfile('lib','LaTeX','CatSuit','Paths.pm'), 'bibtex',    $BIBTEX);
+fix_path_assignment(catfile('lib','LaTeX','CatSuit','Paths.pm'), 'makeindex', $MAKEINDEX);
+fix_path_assignment(catfile('lib','LaTeX','CatSuit','Paths.pm'), 'dvips',     $DVIPS);
+fix_path_assignment(catfile('lib','LaTeX','CatSuit','Paths.pm'), 'dvipdfm',   $DVIPDFM);
+fix_path_assignment(catfile('lib','LaTeX','CatSuit','Paths.pm'), 'ps2pdf',    $PS2PDF);
+fix_path_assignment(catfile('lib','LaTeX','CatSuit','Paths.pm'), 'ps2pdf',    $PDF2PS);
 
 #------------------------------------------------------------------------
 
 my %opts = (
-    'NAME'	       => 'LaTeX-Driver',
-    'VERSION_FROM' => 'lib/LaTeX/Driver.pm',
-    'EXE_FILES'    => [ 'scripts/latex2dvi', 'scripts/latex2pdf', 'scripts/latex2ps' ],
+    'NAME'	       => 'LaTeX-CatSuit',
+    'VERSION_FROM' => 'lib/LaTeX/CatSuit.pm',
     'PMLIBDIRS'    => [ 'lib' ], 
     'PREREQ_PM'    => { 
 	'BSD::Resource'    => 0,
@@ -90,8 +89,8 @@ my %opts = (
 my $EM_VERSION = $ExtUtils::MakeMaker::VERSION;
 $EM_VERSION =~ s/_.+//;
 if ($EM_VERSION >= '5.43') {
-    $opts{ AUTHOR   } = 'Andrew Ford <a.ford@ford-mason.co.uk>';
-    $opts{ ABSTRACT } = 'LaTeX Driver',
+    $opts{ AUTHOR   } = 'Jerome Eteve <jeteve@cpan.org>';
+    $opts{ ABSTRACT } = 'LaTeX CatSuit',
 }
 
 WriteMakefile(%opts);
@@ -101,7 +100,7 @@ WriteMakefile(%opts);
 # fix_assignment($file, $find, $fix)
 #
 # Fixes a variable definition in a file.  e.g. 
-# fix_path_assignment('lib/LaTeX/Driver/Paths.pm', '$LATEX', '/path/to/latex')
+# fix_path_assignment('lib/LaTeX/CatSuit/Paths.pm', '$LATEX', '/path/to/latex')
 #------------------------------------------------------------------------
 
 sub fix_path_assignment {
@@ -187,8 +186,8 @@ sub ttprompt {
 
 
 sub get_module_version {
-    open(MODULE, catfile('lib','LaTeX','Driver.pm'))
-	or die "cannot find LaTeX::Driver module\n";
+    open(MODULE, catfile('lib','LaTeX','CatSuit.pm'))
+	or die "cannot find LaTeX::CatSuit module\n";
     while (<MODULE>) {
 	return $1 if /VERSION = (\d+\.\d+)/;
     }

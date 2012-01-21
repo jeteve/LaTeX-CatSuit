@@ -9,8 +9,8 @@ use lib ("$Bin/../lib", "$Bin/lib");
 use Data::Dumper;
 
 use Test::More tests => 10;
-use Test::LaTeX::Driver;
-use LaTeX::Driver;
+use Test::LaTeX::CatSuit;
+use LaTeX::CatSuit;
 
 ## Be liberal about Test::Exception
 BEGIN {
@@ -21,12 +21,12 @@ BEGIN {
 tidy_directory($basedir, $docname, $debug);
 
 diag("Checking formatting a document with an incorrect latex path");
-my $drv = LaTeX::Driver->new( source => $docpath,
+my $drv = LaTeX::CatSuit->new( source => $docpath,
 			      format => 'dvi',
             paths => { 'latex' => '/a/non/existing/command' },
 			      @DEBUGOPTS );
 
-isa_ok($drv, 'LaTeX::Driver');
+isa_ok($drv, 'LaTeX::CatSuit');
 is($drv->basedir, $basedir, "checking basedir");
 is($drv->basename, $docname, "checking basename");
 is($drv->basepath, File::Spec->catpath('', $basedir, $docname), "checking basepath");
@@ -38,7 +38,7 @@ throws_ok( sub {
              if( $e = $@ ){
                die $e;
              }
-           }, 'LaTeX::Driver::Exception' , "Broken command doesnt run");
+           }, 'LaTeX::CatSuit::Exception' , "Broken command doesnt run");
 like( $e , qr/General command failure executing/ , "The right exception is thrown");
 
 is($drv->stats->{runs}{latex},        1, "should have run latex once");

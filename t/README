@@ -1,4 +1,4 @@
-This directory contains unit test scripts for the LaTeX::Driver module.
+This directory contains unit test scripts for the LaTeX::CatSuit module.
 
 The test scripts invoke the module to format documents in
 subdirectories of the testdata directory.  Each subdirectory
@@ -23,6 +23,3 @@ write test scripts to cover
 * documents with errors (in progress)
 
 * test generation of PDF and PostScript files
-
-
-

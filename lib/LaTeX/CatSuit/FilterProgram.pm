@@ -1,22 +1,21 @@
 #============================================================= -*-perl-*-
 #
-# LaTeX::Driver::FilterProgram
+# LaTeX::CatSuit::FilterProgram
 #
 # DESCRIPTION
 #   Implements the guts of the latex2xxx filter programs
 #
 # AUTHOR
+#   Jerome Eteve   <jeteve@cpan.org>
 #   Andrew Ford    <a.ford@ford-mason.co.uk>
 #
 # COPYRIGHT
+#   Copyright (C) 2012 Jerome Eteve. All rights Reserved.
 #   Copyright (C) 2007 Andrew Ford.  All Rights Reserved.
 #
 #   This module is free software; you can redistribute it and/or
 #   modify it under the same terms as Perl itself.
 #
-# HISTORY
-#
-#   $Id: Paths.pm 45 2007-09-28 10:33:19Z andrew $
 #========================================================================
 
 package LaTeX::Driver::FilterProgram;
@@ -25,7 +24,7 @@ use strict;
 use warnings;
 use Carp;
 
-use LaTeX::Driver;
+use LaTeX::CatSuit;
 use Getopt::Long;
 use File::Slurp;
 
@@ -76,12 +75,12 @@ sub execute {
 	$output = \$tmp;
     }
     eval {
-	my $drv = LaTeX::Driver->new( source => $source,
+	my $drv = LaTeX::CatSuit->new( source => $source,
 				      output => $output,
 				      format => $options{format} );
         $drv->run;
     };
-    if (my $e = LaTeX::Driver::Exception->caught()) {
+    if (my $e = LaTeX::CatSuit::Exception->caught()) {
         $e->show_trace(1);
 #        my $extra = sprintf("\nat %s line %d (%s)\n%s", $e->file, $e->line, $e->package, $e->trace);
         die $e; #sprintf("%s\n%s", "$e", $e->trace);
@@ -101,20 +100,20 @@ __END__
 
 =head1 NAME
 
-LaTeX::Driver::FilterProgram
+LaTeX::CatSuit::FilterProgram
 
 =head1 VERSION
 
 =head1 SYNOPSIS
 
-  use LaTeX::Driver::FilterProgram;
-  LaTeX::Driver::FilterProgram->execute(format => $format);
+  use LaTeX::CatSuit::FilterProgram;
+  LaTeX::CatSuit::FilterProgram->execute(format => $format);
 
 =head1 DESCRIPTION
 
 This module is not intended to be used except by the programs
 C<latex2pdf>, C<latex2ps> and C<latex2dvi> that are included in the
-LaTeX::Driver distribution.  It implements the guts of those filter
+LaTeX::CatSuit distribution.  It implements the guts of those filter
 programs.
 
 =head1 SUBROUTINES/METHODS
@@ -124,7 +123,7 @@ programs.
 =item C<execute(%params)>
 
 This is the only method.  It implements the guts of the filter
-programs, gathering the parameters for the C<LaTeX::Driver> object
+programs, gathering the parameters for the C<LaTeX::CatSuit> object
 constructor from the command line options, along with the options
 passed from the calling script, which should be the format option.
 Having constructed a driver object it then runs the driver.
@@ -132,7 +131,7 @@ Having constructed a driver object it then runs the driver.
 If the C<-tt2> option is specified then the source document is taken
 to be a Template Toolkit template and a Template object is constructed
 and the template processed through that before being fed to the
-C<LaTeX::Driver> module for latex formatting.  Template variables may
+C<LaTeX::CatSuit> module for latex formatting.  Template variables may
 defined with the C<-define> option and these are passed to the
 Template Toolkit processing stage (they are ignored if the C<-tt2>
 option is not specified).
@@ -141,14 +140,14 @@ option is not specified).
 
 =head1 DIAGNOSTICS
 
-The module invokes the C<LaTeX::Driver> module and optionally the
+The module invokes the C<LaTeX::CatSuit> module and optionally the
 C<Template> module.  Any errors from those modules are propogated
 outwards.
 
 =head1 CONFIGURATION AND ENVIRONMENT
 
 The module invokes the latex family of programs via the
-C<LaTeX::Driver> module.  Those programs have their own set of
+C<LaTeX::CatSuit> module.  Those programs have their own set of
 environment variables and configuration files.
 
 

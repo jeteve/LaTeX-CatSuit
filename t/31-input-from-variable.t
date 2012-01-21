@@ -9,24 +9,24 @@ use lib ("$Bin/../lib", "$Bin/lib");
 use Data::Dumper;
 
 use Test::More tests => 13;
-use Test::LaTeX::Driver;
-use LaTeX::Driver;
+use Test::LaTeX::CatSuit;
+use LaTeX::CatSuit;
 use File::Slurp;
 
 tidy_directory($basedir, $docname, $debug);
 
 my $source = read_file($docpath) or die "cannot read the source data";
 my $output;
-my $drv = LaTeX::Driver->new( source      => \$source,
+my $drv = LaTeX::CatSuit->new( source      => \$source,
 			      format      => 'ps',
 			      output      => \$output,
 			      @DEBUGOPTS );
 
 diag("Checking the formatting of a simple LaTeX document read from a variable");
-isa_ok($drv, 'LaTeX::Driver');
-like($drv->basedir, qr{^/tmp/$LaTeX::Driver::DEFAULT_TMPDIR\w+$}, "checking basedir");
-is($drv->basename, $LaTeX::Driver::DEFAULT_DOCNAME, "checking basename");
-is($drv->basepath, File::Spec->catpath('', $drv->basedir, $LaTeX::Driver::DEFAULT_DOCNAME), "checking basepath");
+isa_ok($drv, 'LaTeX::CatSuit');
+like($drv->basedir, qr{^/tmp/$LaTeX::CatSuit::DEFAULT_TMPDIR\w+$}, "checking basedir");
+is($drv->basename, $LaTeX::CatSuit::DEFAULT_DOCNAME, "checking basename");
+is($drv->basepath, File::Spec->catpath('', $drv->basedir, $LaTeX::CatSuit::DEFAULT_DOCNAME), "checking basepath");
 is($drv->formatter, 'latex', "formatter");
 
 ok($drv->run, "formatting $docname");

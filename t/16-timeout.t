@@ -10,18 +10,18 @@ use Data::Dumper;
 
 use Test::More;
 use Test::Exception;
-use Test::LaTeX::Driver;
-use LaTeX::Driver;
+use Test::LaTeX::CatSuit;
+use LaTeX::CatSuit;
 
 tidy_directory($basedir, $docname, $debug);
 
-my $drv = LaTeX::Driver->new( source => $docpath,
+my $drv = LaTeX::CatSuit->new( source => $docpath,
                               format => 'dvi',
                               timeout => 1,
                               @DEBUGOPTS );
 
 diag("Checking the timeout feature");
-isa_ok($drv, 'LaTeX::Driver');
+isa_ok($drv, 'LaTeX::CatSuit');
 is($drv->basedir, $basedir, "checking basedir");
 is($drv->basename, $docname, "checking basename");
 is($drv->basepath, File::Spec->catpath('', $basedir, $docname), "checking basepath");
@@ -36,7 +36,7 @@ tidy_directory($basedir, $docname, $debug);
 ## Note that because we are still in the same process, this also tests that
 ## the timeout implementation doesnt break the current process.
 {
-    my $drv = LaTeX::Driver->new( source => $docpath,
+    my $drv = LaTeX::CatSuit->new( source => $docpath,
                                   format => 'dvi',
                                   #timeout => 1,
                                   @DEBUGOPTS );

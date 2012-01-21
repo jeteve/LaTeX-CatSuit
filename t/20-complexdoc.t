@@ -10,19 +10,19 @@ use Data::Dumper;
 
 use Test::More tests => 12;
 
-use Test::LaTeX::Driver;
-use LaTeX::Driver;
+use Test::LaTeX::CatSuit;
+use LaTeX::CatSuit;
 
 tidy_directory($basedir, $docname, $debug);
 
-my $drv = LaTeX::Driver->new( source    => $docpath,
+my $drv = LaTeX::CatSuit->new( source    => $docpath,
 			      format    => 'dvi',
 			      TEXINPUTS => [ "$Bin/testdata/00-common"],
 			      @DEBUGOPTS );
 
 
 diag("Checking the formatting of a complex LaTeX document with references, a bibliography, an index, etc");
-isa_ok($drv, 'LaTeX::Driver');
+isa_ok($drv, 'LaTeX::CatSuit');
 is($drv->basedir, $basedir, "checking basedir");
 is($drv->basename, $docname, "checking basename");
 is($drv->basepath, File::Spec->catpath('', $basedir, $docname), "checking basepath");

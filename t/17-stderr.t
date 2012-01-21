@@ -10,8 +10,8 @@ use Data::Dumper;
 
 use Test::More;
 use Test::Exception;
-use Test::LaTeX::Driver;
-use LaTeX::Driver;
+use Test::LaTeX::CatSuit;
+use LaTeX::CatSuit;
 
 tidy_directory($basedir, $docname, $debug);
 
@@ -21,7 +21,7 @@ my $which_xelatex = File::Which::which($xelatex);
 
 SKIP: {
   skip "No ".$xelatex." binary found on system. Skipping tests" , 1  unless $which_xelatex;
-  my $drv = LaTeX::Driver->new( source => $docpath,
+  my $drv = LaTeX::CatSuit->new( source => $docpath,
                                 format => 'pdf',
                                 timeout => 1,
                                 paths => { 'pdflatex' => $which_xelatex },
@@ -34,7 +34,7 @@ SKIP: {
   tidy_directory($basedir, $docname, $debug);
 
   ## Now test that running without the option behaves as usual.
-  $drv = LaTeX::Driver->new( source => $docpath,
+  $drv = LaTeX::CatSuit->new( source => $docpath,
                                 format => 'pdf',
                                 timeout => 1,
                                 paths => { 'pdflatex' => $which_xelatex },

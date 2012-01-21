@@ -4,13 +4,14 @@ INSTALL
 Changes
 TODO
 Makefile.PL                    
-lib/LaTeX/Driver.pm
-lib/LaTeX/Driver/Paths.pm
-lib/LaTeX/Driver/FilterProgram.pm
+lib/LaTeX/CatSuit.pm
+lib/LaTeX/CatSuit/Paths.pm
+lib/LaTeX/CatSuit/FilterProgram.pm
 t/README
 t/00-basic.t
 t/01-errors.t
 t/02-brokendocs.t
+t/03-brokencommand.t
 t/10-simpledoc.t
 t/11-references.t
 t/12-includes.t
@@ -26,7 +27,7 @@ t/90-kwalitee.t
 t/91-pod.t
 t/92-pod-coverage.t
 t/93-perl-critic.t
-t/lib/Test/LaTeX/Driver.pm
+t/lib/Test/LaTeX/CatSuit.pm
 t/perlcriticrc
 t/testdata/00-common/testinc2.tex
 t/testdata/01-errors/01-errors.tex
@@ -48,8 +49,4 @@ t/testdata/20-complexdoc/testbib.bib
 t/testdata/20-complexdoc/testinc.tex
 t/testdata/30-output-to-variable/30-output-to-variable.tex
 t/testdata/31-input-from-variable/31-input-from-variable.tex
-scripts/README
-scripts/latex2dvi
-scripts/latex2pdf
-scripts/latex2ps
 META.yml                                 Module meta-data (added by MakeMaker)

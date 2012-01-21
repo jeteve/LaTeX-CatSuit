@@ -1,6 +1,6 @@
 #========================================================================
 #
-# LaTeX::Driver
+# LaTeX::CatSuit
 #
 # DESCRIPTION
 #   Driver module that encapsulates the details of formatting a LaTeX document
@@ -23,10 +23,9 @@
 #
 #   * Extracted from the Template::Latex module (AF, 2007-09-10)
 #
-#   $Id: Driver.pm 76 2009-01-19 13:39:01Z andrew $
 #========================================================================
 
-package LaTeX::Driver;
+package LaTeX::CatSuit;
 
 use strict;
 use warnings;
@@ -34,7 +33,7 @@ use warnings;
 use base 'Class::Accessor';
 use Cwd;                        # from PathTools
 use English;                    # standard Perl class
-use Exception::Class ( 'LaTeX::Driver::Exception' );
+use Exception::Class ( 'LaTeX::CatSuit::Exception' );
 use BSD::Resource;              # for timeout implementation
 use File::Copy;                 # standard Perl class
 use File::Compare;              # standard Perl class
@@ -44,7 +43,7 @@ use File::Spec;                 # from PathTools
 use IO::File;                   # from IO
 use Carp;                       # for confess
 
-our $VERSION = 0.11;
+our $VERSION = 1.00;
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format
@@ -59,19 +58,19 @@ our $DEBUGPREFIX;
 
 # LaTeX executable paths set at installation time by the Makefile.PL
 
-eval { require LaTeX::Driver::Paths };
+eval { require LaTeX::CatSuit::Paths };
 
 our @PROGRAM_NAMES = qw(latex pdflatex bibtex makeindex dvips dvipdfm ps2pdf pdf2ps);
 our %program_path;
 
-map { $program_path{$_} = $LaTeX::Driver::Paths::program_path{$_} || "/usr/bin/$_" } @PROGRAM_NAMES;
+map { $program_path{$_} = $LaTeX::CatSuit::Paths::program_path{$_} || "/usr/bin/$_" } @PROGRAM_NAMES;
 
 
 our @LOGFILE_EXTS = qw( log blg ilg );
 our @TMPFILE_EXTS = qw( aux log lot toc bbl ind idx cit cbk ibk );
 
 
-our $DEFAULT_TMPDIR  = 'latexdrv';
+our $DEFAULT_TMPDIR  = 'latexcatsuit';
 our $DEFAULT_DOCNAME = 'latexdoc';
 
 # valid output formats and program alias
@@ -854,7 +853,7 @@ sub program_path {
 
 sub throw {
     my $self = shift;
-    LaTeX::Driver::Exception->throw( error => join('', @_) );
+    LaTeX::CatSuit::Exception->throw( error => join('', @_) );
 }
 
 sub debug {
@@ -870,17 +869,17 @@ __END__
 
 =head1 NAME
 
-LaTeX::Driver - Latex driver
+LaTeX::CatSuit - Latex driver - Forked from LaTeX::Driver by A. Ford-Mason with extra features.
 
 =head1 VERSION
 
-This document describes version 0.08 of C<LaTeX::Driver>.
+This document describes version 1.00 of C<LaTeX::CatSuit>.
 
 =head1 SYNOPSIS
 
-    use LaTeX::Driver;
+    use LaTeX::CatSuit;
 
-    $drv = LaTeX::Driver->new( source  => \$doc_text,
+    $drv = LaTeX::CatSuit->new( source  => \$doc_text,
                                output  => $filename,
                                format  => 'pdf',
                                %other_params );
@@ -890,7 +889,7 @@ This document describes version 0.08 of C<LaTeX::Driver>.
 
 =head1 DESCRIPTION
 
-The LaTeX::Driver module encapsulates the details of invoking the
+The LaTeX::CatSuit module encapsulates the details of invoking the
 Latex programs to format a LaTeX document.  Formatting with LaTeX is
 complicated; there are potentially many programs to run and the output
 of those programs must be monitored to determine whether further
@@ -1261,14 +1260,14 @@ location.
 
 =head1 DEPENDENCIES
 
-C<LaTeX::Driver> depends on latex and friends being installed.
+C<LaTeX::CatSuit> depends on latex and friends being installed.
 
 
 =head1 BUGS AND LIMITATIONS
 
 This is beta software - there are bound to be bugs and misfeatures.
 If you have any comments about this software I would be very grateful
-to hear them; email me at E<lt>a.ford@ford-mason.co.ukE<gt>.
+to hear them; email me at E<lt>jeteve@cpan.org<gt>.
 
 Among the things I am aware of are:
 
@@ -1300,6 +1299,8 @@ Investigate pre- and post-processors and other auxilliary programs.
 
 
 =head1 BACKGROUND
+
+This is a fork of the original LaTeX::Driver module.
 
 This module has its origins in the original C<latex> filter that was
 part of Template Toolkit prior to version 2.16.  That code was fairly
