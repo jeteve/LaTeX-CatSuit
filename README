@@ -1,5 +1,5 @@
 
-                             LaTeX::Driver
+                             LaTeX::CatSuit
 
                              Version 0.11
 
@@ -14,8 +14,6 @@
 
               $Id: README 80 2009-01-19 13:42:25Z andrew $
 
-NOTE THIS IS BETA SOFTWARE - ITS INTERFACE IS LIABLE TO CHANGE.
-
 
 I welcome any and all feedback - Andrew <a.ford@ford-mason.co.uk> / jerome.eteve@gmail.com
 
@@ -28,7 +26,7 @@ to hear if anyone is actually using it.
 DESCRIPTION
 -----------
 
-The LaTeX::Driver module takes care of running and re-running latex on
+The LaTeX::CatSuit module takes care of running and re-running latex on
 a LaTeX document so that forward references, tables of contents, and
 lists of figures and tables are resolved.  It will also run bibtex and
 makeindex if it detects that a bibliography or in index have been
@@ -45,14 +43,14 @@ of which are on CTAN (the Comprehensive TeX Archive Network).
 QUICK START
 -----------
 
-The latest version of the LaTeX::Driver module can be retrieved from:
+The latest version of the LaTeX::CatSuit module can be retrieved from:
 
-    http://www.cpan.org/modules/by-module/LaTeX-Driver/
+    http://www.cpan.org/modules/by-module/LaTeX-CatSuit/
 
 To install the module
 
-    tar zxf LaTeX-Driver-0.06.tar.gz
-    cd LaTeX-Driver-0.06
+    tar zxf LaTeX-CatSuit-0.06.tar.gz
+    cd LaTeX-CatSuit-0.06
     perl Makefile.PL
     make
     make test
@@ -97,11 +95,11 @@ releases.
 GENERAL FEATURES
 ----------------
 
-Some of the key features of the Latex::Driver module are listed below.
+Some of the key features of the LaTeX::CatSuit module are listed below.
 
 The module is invoked like this:
 
-    $drv = LaTeX::Driver->new( source  => $source,
+    $drv = LaTeX::CatSuit->new( source  => $source,
 			       output  => $output,
 			       format  => 'pdf', # or 'dvi' or 'ps'
 			       maxruns => 8, 
@@ -145,7 +143,7 @@ planned enhancements and possible new features for future versions.
 
 The rest of the documentation is distributed in Pod and HTML formats.
 The Pod pages are installed when you 'make install' and can be viewed
-using 'perldoc', e.g. 'perldoc LaTeX::Driver'.
+using 'perldoc', e.g. 'perldoc LaTeX::CatSuit'.
 
 
 SUPPORT
@@ -158,7 +156,9 @@ Currently the only support is direct from the author.
 AUTHOR
 ------
 
-This module was written by Andrew Ford <a.ford@ford-mason.co.uk>.
+This module has been forked from the original LaTeX::Driver.
+
+LaTeX::Driver was originally written by Andrew Ford <a.ford@ford-mason.co.uk>.
 
 It borrows from the Template Toolkit distribution by Andy Wardley
 <abw@wardley.org> with the assistance and contributions from many
