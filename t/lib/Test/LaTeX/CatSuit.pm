@@ -60,7 +60,7 @@ GetOptions("debug"      => \$debug,
 
 $debug = $level if $level;
 
-our @DEBUGOPTS = ( DEBUG => $debug, DEBUGPREFIX => $debug_prefix);
+our @DEBUGOPTS = ( DEBUG => $debug );
 
 our ($testno, $basedir, $docname, $docpath) = get_test_params();
 

@@ -34,7 +34,6 @@ use base 'Class::Accessor';
 use Cwd;                        # from PathTools
 use English;                    # standard Perl class
 use Exception::Class ( 'LaTeX::CatSuit::Exception' );
-use BSD::Resource;              # for timeout implementation
 use File::Copy;                 # standard Perl class
 use File::Compare;              # standard Perl class
 use File::Path;                 # standard Perl class
@@ -697,16 +696,17 @@ sub run_command {
         die "This should never be reached";
     }
     if( $pid == 0 ){
-        if( defined $self->timeout() ){
-            ## Set up some timeout with BSD::Resource
-            my $cpu_seconds = $self->timeout();
-            unless( setrlimit(RLIMIT_CPU, $cpu_seconds, $cpu_seconds) ){
-                die "Cannot set CPU Seconds limit on child process";
-            }
-        }
-
-        ## Lets execute
-        exec($cmd); ## This never returns.
+      if( defined $self->timeout() ){
+        ## Alarm myself on timeout.
+        ## Its ok not to handle this, because this will die with the right
+        ## signal.
+        my $timeout = $self->timeout();
+        debug("Setting timeout at $timeout seconds");
+        alarm($timeout);
+      }
+      ## Lets execute
+      debug("Executing $cmd");
+      exec($cmd); ## This never returns.
     }
 
     ## Still in the parent. Waiting for the child. Blocking call.
@@ -842,12 +842,13 @@ sub program_path {
 #------------------------------------------------------------------------
 
 sub throw {
-    my $self = shift;
-    LaTeX::CatSuit::Exception->throw( error => join('', @_) );
+  my ( $self , @errors ) = @_;
+  debug("Throwing exception with errors ",@errors);
+  LaTeX::CatSuit::Exception->throw( error => join('', @errors ) );
 }
 
 sub debug {
-    print STDERR $DEBUGPREFIX || "[latex] ", @_;
+    print STDERR $DEBUGPREFIX || "[".__PACKAGE__."] " , @_;
     print STDERR "\n" unless $_[-1] =~ / \n $ /mx;
     return;
 }
@@ -974,7 +975,8 @@ generated temporary directory, but will leave all other files intact.
 =item C<timeout>
 
 Specifies a timeout in second under which any underlying LaTeX command should finish.
-The run method will die in case it takes too long.
+The run method will die in case it takes too long. This is implemented using alarm,
+so it's not sensitive to all subprocesses the latex commands can actually spawn.
 
 =item C<indexstyle>
 

@@ -69,7 +69,6 @@ my %opts = (
     'VERSION_FROM' => 'lib/LaTeX/CatSuit.pm',
     'PMLIBDIRS'    => [ 'lib' ], 
     'PREREQ_PM'    => { 
-	'BSD::Resource'    => 0,
 	'Class::Accessor'  => 0,
 	'Cwd'              => 0,
 	'Exception::Class' => 0,

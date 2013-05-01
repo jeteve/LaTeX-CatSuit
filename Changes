@@ -1,3 +1,14 @@
+2013-01-05 1.00-RC3
+
+   - Implemented timeouts with alarm. Note that this is a significant change.
+
+
+2011-09-25 1.00-RC1
+ 
+   - Forked off LaTeX::Driver (See below for old Changes history)
+
+
+
 #================================================= -*- indented-text -*-
 #
 # Changes 
