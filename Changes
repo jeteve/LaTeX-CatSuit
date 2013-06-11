@@ -1,3 +1,7 @@
+2013-01-05 1.00-RC4
+
+   - timeout implementation now kills all processes in the group. This prevent runaway LaTeX sub processes.
+
 2013-01-05 1.00-RC3
 
    - Implemented timeouts with alarm. Note that this is a significant change.

@@ -31,6 +31,7 @@ use strict;
 use warnings;
 
 use base 'Class::Accessor';
+use Carp;                       # for confess
 use Cwd;                        # from PathTools
 use English;                    # standard Perl class
 use Exception::Class ( 'LaTeX::CatSuit::Exception' );
@@ -40,9 +41,8 @@ use File::Path;                 # standard Perl class
 use File::Slurp;
 use File::Spec;                 # from PathTools
 use IO::File;                   # from IO
-use Carp;                       # for confess
 
-our $VERSION = '1.00_03';
+our $VERSION = '1.00_04';
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format
@@ -696,22 +696,27 @@ sub run_command {
         die "This should never be reached";
     }
     if( $pid == 0 ){
+      ## Lets execute
+      debug("As a new group: Executing $cmd");
+      setpgrp(0,0);
+      exec($cmd); ## This never returns.
+    }
+
+    ## Still in the parent. Waiting for the child but not too long. Blocking call.
+    my $exitstatus;
+    {
+      local $SIG{ALRM} = sub { debug("We waited enough for $pid. Killing the group");
+                               ## Note that we use the POSIX form of killing a group (negative pid) here.
+                               kill( 15 , 0-$pid ); };
       if( defined $self->timeout() ){
-        ## Alarm myself on timeout.
-        ## Its ok not to handle this, because this will die with the right
-        ## signal.
         my $timeout = $self->timeout();
         debug("Setting timeout at $timeout seconds");
         alarm($timeout);
       }
-      ## Lets execute
-      debug("Executing $cmd");
-      exec($cmd); ## This never returns.
+      waitpid($pid, 0);
+      $exitstatus = $?;
+      alarm(0);
     }
-
-    ## Still in the parent. Waiting for the child. Blocking call.
-    waitpid($pid, 0);
-    my $exitstatus = $?;
 
     if( $exitstatus != 0 ){
       if( $exitstatus == -1 ){

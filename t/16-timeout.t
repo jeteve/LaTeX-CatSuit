@@ -1,12 +1,10 @@
 #!/usr/bin/perl
-# $Id: 10-simpledoc.t 62 2007-10-03 14:20:44Z andrew $
 
 use strict;
 use blib;
 use FindBin qw($Bin);
 use File::Spec;
 use lib ("$Bin/../lib", "$Bin/lib");
-use Data::Dumper;
 
 use Test::More;
 use Test::Exception;
