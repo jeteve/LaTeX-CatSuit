@@ -75,6 +75,7 @@ my %opts = (
 	'File::Slurp'      => 0,
 	'File::Spec'       => 0,
 	'IO::File'         => 0,
+        'Log::Log4perl'    => 0,
 	'Test::More'       => 0,
 	'Test::Exception'  => 0,
     },

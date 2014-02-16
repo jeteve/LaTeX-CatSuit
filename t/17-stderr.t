@@ -10,6 +10,10 @@ use Data::Dumper;
 
 use Test::More;
 use Test::Exception;
+
+use Log::Log4perl qw/:easy/;
+Log::Log4perl->easy_init($INFO);
+
 use Test::LaTeX::CatSuit;
 use LaTeX::CatSuit;
 

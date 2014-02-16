@@ -9,6 +9,10 @@ use lib ("$Bin/../lib", "$Bin/lib");
 use Data::Dumper;
 
 use Test::More tests => 11;
+
+use Log::Log4perl qw/:easy/;
+Log::Log4perl->easy_init($INFO);
+
 use Test::LaTeX::CatSuit;
 use LaTeX::CatSuit;
 

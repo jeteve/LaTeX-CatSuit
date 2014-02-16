@@ -6,6 +6,9 @@ use strict;
 use blib;
 use vars qw($testno $basedir $docname $drv $debug $debugprefix $dont_tidy_up);
 
+use Log::Log4perl qw/:easy/;
+Log::Log4perl->easy_init($DEBUG);
+
 use FindBin qw($Bin);
 use File::Spec;
 use lib ("$Bin/../lib", "$Bin/lib");

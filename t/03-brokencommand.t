@@ -12,6 +12,9 @@ use Test::More tests => 10;
 use Test::LaTeX::CatSuit;
 use LaTeX::CatSuit;
 
+use Log::Log4perl qw/:easy/;
+Log::Log4perl->easy_init($INFO);
+
 ## Be liberal about Test::Exception
 BEGIN {
     eval "use Test::Exception";

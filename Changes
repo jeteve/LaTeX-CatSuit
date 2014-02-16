@@ -1,3 +1,7 @@
+2014-02-16 1.00-RC5
+
+   - Now used Log::Log4perl for logging.
+
 2013-01-05 1.00-RC4
 
    - timeout implementation now kills all processes in the group. This prevent runaway LaTeX sub processes.

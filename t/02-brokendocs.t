@@ -10,6 +10,10 @@ use Data::Dumper;
 
 use Test::More;
 
+use Log::Log4perl qw/:easy/;
+Log::Log4perl->easy_init($INFO);
+
+
 BEGIN {
     eval "use Test::Exception";
     plan skip_all => "Test::Exception needed" if $@;
