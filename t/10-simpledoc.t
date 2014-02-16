@@ -11,7 +11,7 @@ use Data::Dumper;
 use Test::More tests => 22;
 
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($INFO);
+Log::Log4perl->easy_init($FATAL);
 
 use Test::LaTeX::CatSuit;
 use LaTeX::CatSuit;
@@ -23,7 +23,7 @@ my $drv = LaTeX::CatSuit->new( source => $docpath,
 			      format => 'dvi',
 			      @DEBUGOPTS );
 
-diag("Checking the formatting of a simple LaTeX document");
+## diag("Checking the formatting of a simple LaTeX document");
 isa_ok($drv, 'LaTeX::CatSuit');
 is($drv->basedir, $basedir, "checking basedir");
 is($drv->basename, $docname, "checking basename");
@@ -45,7 +45,7 @@ test_dvifile($drv, [ "Simple Test Document $testno",	# title
 
 tidy_directory($basedir, $docname, $debug);
 
-diag("Checking the generation of PDF");
+## diag("Checking the generation of PDF");
 $drv = LaTeX::CatSuit->new( source => $docpath,
 			   format => 'pdf',
 			   @DEBUGOPTS );
@@ -58,7 +58,7 @@ ok(! -f ($drv->basepath . '.ps'),  "but PS  file doesn't");
 
 tidy_directory($basedir, $docname, $debug);
 
-diag("Checking the generation of PostScript");
+## diag("Checking the generation of PostScript");
 $drv = LaTeX::CatSuit->new( source => $docpath,
 			   format => 'ps',
 			   @DEBUGOPTS );
@@ -71,7 +71,7 @@ ok(! -f ($drv->basepath . '.pdf'),  "but PS file doesn't");
 
 tidy_directory($basedir, $docname, $debug);
 
-diag("Checking the generation of PDF, via PostScript");
+## diag("Checking the generation of PDF, via PostScript");
 $drv = LaTeX::CatSuit->new( source => $docpath,
 			   format => 'pdf(ps)',
 			   @DEBUGOPTS );

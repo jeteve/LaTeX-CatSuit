@@ -20,7 +20,7 @@ use Data::Dumper;
 use Test::More tests => 16;
 
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($INFO);
+Log::Log4perl->easy_init($FATAL);
 
 use Test::LaTeX::CatSuit;
 use LaTeX::CatSuit;
@@ -31,7 +31,7 @@ $drv = LaTeX::CatSuit->new( source => $docpath,
 			   format => 'dvi',
 			   @DEBUGOPTS );
 
-diag("Checking the formatting of a LaTeX document with an index");
+## diag("Checking the formatting of a LaTeX document with an index");
 isa_ok($drv, 'LaTeX::CatSuit');
 is($drv->basedir, $basedir, "checking basedir");
 is($drv->basename, $docname, "checking basename");
@@ -58,7 +58,7 @@ test_dvifile($drv, [ "Simple Test Document $testno",	# title
 
 tidy_directory($basedir, $docname, $debug);
 
-diag("run again with an explicit index style option");
+## diag("run again with an explicit index style option");
 $drv = LaTeX::CatSuit->new( source     => $docpath,
 			   format     => 'dvi',
 			   indexstyle => 'testind',
@@ -77,7 +77,7 @@ test_dvifile($drv, [ '^Index$',				# Index section heading
 
 tidy_directory($basedir, $docname, $debug);
 
-diag("run again with -l (letter ordering) option");
+## diag("run again with -l (letter ordering) option");
 $drv = LaTeX::CatSuit->new( source       => $docpath,
 			   format       => 'dvi',
 			   indexoptions => '-l',

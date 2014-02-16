@@ -11,7 +11,7 @@ use Data::Dumper;
 use Test::More;
 
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($INFO);
+Log::Log4perl->easy_init($FATAL);
 
 
 BEGIN {
@@ -31,7 +31,7 @@ my $drv = LaTeX::CatSuit->new( source      => $docpath,
 			      DEBUG       => $debug,
 			      DEBUGPREFIX => '# [latex]: ' );
 
-diag("Checking the formatting of a simple LaTeX document");
+## diag("Checking the formatting of a simple LaTeX document");
 isa_ok($drv, 'LaTeX::CatSuit');
 is($drv->basedir, $basedir, "checking basedir");
 is($drv->basename, $docname, "checking basename");

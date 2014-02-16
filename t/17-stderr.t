@@ -12,7 +12,7 @@ use Test::More;
 use Test::Exception;
 
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($INFO);
+Log::Log4perl->easy_init($FATAL);
 
 use Test::LaTeX::CatSuit;
 use LaTeX::CatSuit;

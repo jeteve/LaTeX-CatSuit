@@ -11,7 +11,7 @@ use Data::Dumper;
 use Test::More tests => 10;
 
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($INFO);
+Log::Log4perl->easy_init($FATAL);
 
 
 use Test::LaTeX::CatSuit;
@@ -23,7 +23,7 @@ my $drv = LaTeX::CatSuit->new( source => $docpath,
 			      format => 'dvi',
 			      @DEBUGOPTS );
 
-diag("Checking the formatting of a LaTeX document with forward references");
+## diag("Checking the formatting of a LaTeX document with forward references");
 isa_ok($drv, 'LaTeX::CatSuit');
 is($drv->basedir, $basedir, "checking basedir");
 is($drv->basename, $docname, "checking basename");

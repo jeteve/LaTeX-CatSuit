@@ -7,7 +7,7 @@ use blib;
 use vars qw($testno $basedir $docname $drv $debug $debugprefix $dont_tidy_up);
 
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($DEBUG);
+Log::Log4perl->easy_init($FATAL);
 
 use FindBin qw($Bin);
 use File::Spec;
@@ -34,7 +34,7 @@ my $nonexistent_dir = "$basedir/this-directory-should-not-exist";
 die "hey, someone created our non-existent directory" if -d $nonexistent_dir;
 
 
-diag("testing constructor error handling");
+## diag("testing constructor error handling");
 
 dies_ok { LaTeX::CatSuit->new( DEBUG       => $debug,
 			      DEBUGPREFIX => $debugprefix ) } 'no source specified';

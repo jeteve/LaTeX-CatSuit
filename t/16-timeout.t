@@ -10,7 +10,7 @@ use Test::More;
 use Test::Exception;
 
 use Log::Log4perl qw/:easy/;
-Log::Log4perl->easy_init($INFO);
+Log::Log4perl->easy_init($FATAL);
 
 use Test::LaTeX::CatSuit;
 use LaTeX::CatSuit;
@@ -22,15 +22,15 @@ my $drv = LaTeX::CatSuit->new( source => $docpath,
                               timeout => 1,
                               @DEBUGOPTS );
 
-diag("Checking the timeout feature");
+## diag("Checking the timeout feature");
 isa_ok($drv, 'LaTeX::CatSuit');
 is($drv->basedir, $basedir, "checking basedir");
 is($drv->basename, $docname, "checking basename");
 is($drv->basepath, File::Spec->catpath('', $basedir, $docname), "checking basepath");
 is($drv->formatter, 'latex', "formatter");
-diag("Running with a timeout");
+## diag("Running with a timeout");
 dies_ok( sub{ $drv->run; } ,"Running this job dies because of a timeout");
-diag("Died after one second");
+## diag("Died after one second");
 tidy_directory($basedir, $docname, $debug);
 
 
@@ -42,9 +42,9 @@ tidy_directory($basedir, $docname, $debug);
                                   format => 'dvi',
                                   #timeout => 1,
                                   @DEBUGOPTS );
-    diag("Runing without timeout. Should take a while");
+    ## diag("Runing without timeout. Should take a while");
     lives_ok( sub{ $drv->run() ; } , "Now runs until the end without crashing with no timeout");
-    diag("Took a while");
+    ## diag("Took a while");
     test_dvifile($drv, [ "Simple Test Document $testno",	# title
                          'Jerome Eteve',			# author
                          '04 August 2011',		# date
