@@ -45,14 +45,16 @@ use IO::File;                   # from IO
 use Log::Log4perl;
 my $LOGGER = Log::Log4perl->get_logger();
 
-our $VERSION = '1.00_05';
+our $VERSION = '1.00_06';
 
 __PACKAGE__->mk_accessors( qw( basename basedir basepath options tmpdir
                                source output tmpdir format
                                formatter preprocessors postprocessors _program_path
                                maxruns extraruns stats texinputs_path
                                undefined_citations undefined_references
-                               labels_changed rerun_required timeout capture_stderr) );
+                               labels_changed rerun_required timeout capture_stderr
+                               ignore_empty_errors
+                            ) );
 
 our $DEBUG; $DEBUG = 0 unless defined $DEBUG;
 our $DEBUGPREFIX;
@@ -224,6 +226,7 @@ sub new {
 
     my $timeout = $options->{timeout};
     my $capture_stderr = $options->{capture_stderr} // 0;
+    my $ignore_empty_errors = $options->{ignore_empty_errors} // 0;
 
     # construct and return the object
 
@@ -240,6 +243,7 @@ sub new {
                                  _program_path  => $path,
                                  timeout        => $timeout,
                                  capture_stderr => $capture_stderr,
+                                 ignore_empty_errors => $ignore_empty_errors,
                                  texinputs_path => join(':', ('.', @$texinputs_path, '')),
                                  preprocessors  => [],
                                  postprocessors => \@postprocessors,
@@ -371,8 +375,14 @@ sub run_latex {
             # number.  We make sure we pick up every /^!/ line,
             # and the first /^l.\d/ line after each /^!/ line.
             if ( /^(!.*)/ ) {
-                $errors .= $1 . "\n";
+              my $error = $1;
+              if( $self->ignore_empty_errors() &&
+                  $error =~ /^!+\w*$/ ){
+                # Ignoring empty error.
+              }else{
+                $errors .= $error . "\n";
                 $matched = 1;
+              }
             }
             elsif ( $matched && /^(l\.\d.*)/ ) {
                 $errors .= $1 . "\n";
@@ -1166,6 +1176,10 @@ Usage:
   my $error_file = $this->std_error_file();
   ...
   $this->cleanup();
+
+=item C<ignore_empty_errors>
+
+Boolean. Defaults to 0. Ignore the empty errors in the output.
 
 =back
 
