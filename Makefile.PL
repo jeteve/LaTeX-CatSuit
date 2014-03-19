@@ -14,7 +14,7 @@ select STDOUT;
 our $QUIET  = 0;
 our $ACCEPT = 0;
 our $WIN32  = ($^O eq 'MSWin32');
-our $MODVERSION = '1.00_02';
+our $MODVERSION = '1.00_06';
 
 #------------------------------------------------------------------------
 
